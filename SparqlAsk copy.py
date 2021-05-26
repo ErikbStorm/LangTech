@@ -119,38 +119,38 @@ def getAnswer(w, p_ids, q_ids):
                 if len(answer) != 0:
                     return answer
                 
-# def getEntPred(question):
-#     parse = nlp(question)    
-#     #displacy.serve(parse, style="ent")
-#     #displacy.serve(parse, style="dep")
-
-#     for token in parse:
-#         print(token.orth_, token.pos_, token.dep_)
-    
-    
-#     ws = ['who', 'what', 'when', 'which', 'where', 'how']
-#     ent = []
-#     pred = []
-
-#     ent = [ent.text for ent in parse.ents][:1]
-    
-#     for word in parse:
-#         if word.dep_ == 'ROOT':
-#             for child in word.children:
-#                 if child.dep_ == 'attr' and child.pos_ == 'NOUN':
-#                     pred = [child.lemma_]
-    
-#     if len(pred) == 0:
-#         pred = [word.orth_ for word in parse if word.dep_ == 'ROOT']
-#     #print(ent, pred)
-#     ent = " ".join(ent)
-#     pred = " ".join(pred)
-#     #print(ent, pred)
-    
-    
-#     return ent, pred
-
 def getEntPred(question):
+     parse = nlp(question)    
+     #displacy.serve(parse, style="ent")
+     #displacy.serve(parse, style="dep")
+
+     #for token in parse:
+     #    print(token.orth_, token.pos_, token.dep_)
+    
+    
+     ws = ['who', 'what', 'when', 'which', 'where', 'how']
+     ent = []
+     pred = []
+
+     ent = [ent.text for ent in parse.ents][:1]
+    
+     for word in parse:
+         if word.dep_ == 'ROOT':
+             for child in word.children:
+                 if child.dep_ == 'attr' and child.pos_ == 'NOUN':
+                     pred = [child.lemma_]
+    
+     if len(pred) == 0:
+         pred = [word.orth_ for word in parse if word.dep_ == 'ROOT']
+     #print(ent, pred)
+     ent = " ".join(ent)
+     pred = " ".join(pred)
+     #print(ent, pred)
+    
+    
+     return ent, pred
+
+def getEntPred2(question):
     parse = nlp(question)    
     #displacy.render(parse, jupyter=True, style="ent")
     #displacy.render(parse, jupyter=True, style="dep")
