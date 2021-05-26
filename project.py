@@ -1,5 +1,5 @@
 import csv
-import SparqlAsk
+import new_sparqlAsk
 
 def main():
     evalQuestions('all_questions_with_answers.tsv', write=True)
@@ -17,12 +17,13 @@ def evalQuestions(filename, write=False):
             corr_answers = row[2:]
 
             print(question)
-            sys_answers = SparqlAsk.ask(question)
+            sys_answers = new_sparqlAsk.ask(question)
             score = evaluate(sys_answers, corr_answers)
             print(sys_answers, corr_answers)
             print(score)
-            output.append([question, score, ",".join(sys_answers)])
-            break
+            output.append([question, score, sys_answers])
+            if i > 10:
+                break
     
     #Writing to a file.
     if write:

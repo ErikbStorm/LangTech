@@ -3,6 +3,7 @@ import requests
 import time
 import spacy
 from spacy import displacy
+from Levenshtein import distance as lev
 nlp = spacy.load("en_core_web_sm")
 
 def main():
@@ -11,8 +12,8 @@ def main():
                 'What awards did Frozen receive?',
                 'How many awards did Frozen receive?']
     for question in questions:
+        print(question)
         answer = ask(question, debug=True)
-        print(ask(question, debug=True))
         print(answer)
 
 def execQuery(query, url):
@@ -51,8 +52,17 @@ def getIds(json):
         print(json)
 
 def ask(question, debug=False):
-    ent = getEnt(question)
+    parse = nlp(question)
+    ent = getEnt(parse)
+    prop = removeStopWords(question, ent[0])
+    #print("Properties: " + prop)
     ent_ids = getEntIds(ent)
+
+    properties = getProperties(ent_ids[0])
+
+    return getAnswer(prop, properties)
+
+    return 0
 
     if "how many" in question.lower():
         w = "how many"
@@ -106,13 +116,30 @@ def getAnswer(w, p_ids, q_ids):
                 if len(answer) != 0:
                     return answer
                 
-def getEnt(question):
-     parse = nlp(question)
-
+def getEnt(parse):
      return [ent.text for ent in parse.ents]
 
+def removeStopWords(question, ent):
+    question = question.replace(ent, '')
+    no_stop_words = [word.text for word in nlp(question) 
+                        if not word.is_stop and word.pos_ != 'PUNCT' 
+                        and word.text != ' ']
+    print(no_stop_words)
 
-def getPredicates(ent_id):
+    return " ".join(no_stop_words)
+
+
+def getAnswer(search_pred, properties):
+    distances = {}
+    for property, values in properties.items():
+        distance = lev(property, search_pred)
+        distances[distance] = (property, values)
+
+    id_with_lowest_distance = min(distances.keys())
+
+    return distances[id_with_lowest_distance]
+
+def getProperties(ent_id):
     print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
@@ -132,15 +159,18 @@ def getPredicates(ent_id):
 
     answer = execQuery(query, url)
 
-    print(answer.keys())
+    #print(answer.keys())
 
     prop, value = answer['head']['vars']
 
-    output = []
+    output = {}
     for row in answer['results']['bindings']:
-        output.append((row[prop]['value'], row[value]['value']))
+        if row[prop]['value'] in output:
+            output[row[prop]['value']].append(row[value]['value'])
+        else:
+            output[row[prop]['value']] = [row[value]['value']]
     
-    print(output)
+    #print(output)
 
     return output
 
