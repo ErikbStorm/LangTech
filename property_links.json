@@ -1,0 +1,15 @@
+{
+    "date of birth" : ["old", "born", "date", "birth"],
+    "award received" : ["awards", "receive"],
+    "composer" : ["composer"],
+    "genre" : ["kind", "film", "genre"],
+    "director" : ["direct"],
+    "takes place in fictional universe" : ["take", "place", "set"],
+    "original broadcaster": ["company", "distribute"],
+    "country of origin": ["country", "origin", "come", "from"],
+    "screenwriter": ["screenwriter", "write"],
+    "duration": ["duration", "length"],
+    "review score": ["review", "score", "rating"],
+    "catchphrase" : ["catchphrase"],
+    "number of episodes" : ["number", "episode"]
+}
