@@ -14,9 +14,10 @@ def main():
                 #'What awards did Frozen receive?',
                 #'How many awards did Frozen receive?',
                 #'How old is Jim Carrey?',
-                'Which company distributed Avatar?',
-                'Who is Leonardo di Caprio?',
-                "What is James Bond catchphrase?"]
+                #'Which company distributed Avatar?',
+                #'Who is the mommy of Leonardo di Caprio?',
+                #"What is James Bond catchphrase?",
+                "Where did Brad Pitt go to school?"]
                 
     links = readJson('property_links.json')
     for question in questions:

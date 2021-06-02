@@ -1,5 +1,5 @@
 {
-    "date of birth" : ["old", "born", "date", "birth"],
+    "date of birth" : ["old", "born", "date", "birth", "when"],
     "award received" : ["awards", "receive"],
     "composer" : ["composer"],
     "genre" : ["kind", "film", "genre"],
