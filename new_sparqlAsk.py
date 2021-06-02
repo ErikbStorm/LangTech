@@ -9,25 +9,33 @@ nlp = spacy.load("en_core_web_sm")
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
-                #'Who were the composers for Batman Begins?',
+                # 'Who were the composers for Batman Begins?',
                 #'What awards did Frozen receive?',
                 #'How many awards did Frozen receive?',
                 #'How old is Jim Carrey?',
-                'Which company distributed Avatar?',
-                'Who is Leonardo di Caprio?',
-                "What is James Bond catchphrase?"]
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo di Caprio?',
+                # "What is James Bond catchphrase?",
+                # "Is Brad Pitt female?",
+                "Did Frozen win an award?"
+                ]
 
     links = readJson('property_links.json')
     for question in questions:
         print(question)
         answer = ask(question, links, debug=True)
-        print(answer)
+        print(f"Answer: {answer}")
 
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
     if len(ent) > 0:
-        search_props = removeStopWords(question, ent[0])
+        if parse[0].pos_ == 'AUX':
+            return askYesNo(parse=parse,
+                            ent=ent,
+                            question=question, 
+                            links=links)
+        search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
@@ -43,6 +51,31 @@ def ask(question, links, debug=False):
     else:
         print('No entities found!')
         return [0]
+
+
+def askYesNo(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+    
+    for p, v in properties.items():
+            print(p, " : ", v)
+    
+    print(f"Linkded prop: {properties[linked_prop][0]}")
+    if parse[0].text == 'Is':
+        for prop in search_props:
+            if properties[linked_prop][0] == prop.text:
+                return "Yes"
+    else:
+        if properties[linked_prop][0]:
+            return "Yes"
+    return "No"
+    
 
 def execQuery(query, url):
     req = requests.get(url, params={'query': query, 'format': 'json'})
