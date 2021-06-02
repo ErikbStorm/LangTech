@@ -15,7 +15,7 @@ def main():
                 #'How many awards did Frozen receive?',
                 #'How old is Jim Carrey?',
                 'Which company distributed Avatar?',
-                'Who played James Bond?',
+                'Who is Leonardo di Caprio?',
                 "What is James Bond catchphrase?"]
                 
     links = readJson('property_links.json')
