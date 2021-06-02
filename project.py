@@ -9,12 +9,12 @@ def ask(question):
 
 def evalQuestions(filename, write=False):
     output = []
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
         for i, row in enumerate(file):
             question = row[0]
             wiki_id = row[1]
-            corr_answers = row[2:]
+            corr_answers = [answ.strip() for answ in row[2:]]
 
             print(question)
             sys_answers = new_sparqlAsk.ask(question)
@@ -22,14 +22,14 @@ def evalQuestions(filename, write=False):
             print(sys_answers, corr_answers)
             print(score)
             output.append([question, score, sys_answers])
-            if i > 10:
+            if i > 20:
                 break
     
     #Writing to a file.
     if write:
         write_file = open('results.csv', 'w+', newline='')
         writer = csv.writer(write_file, delimiter='\t')
-        writer.writerows()
+        writer.writerows(output)
         write_file.close()
 
 

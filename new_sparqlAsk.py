@@ -1,28 +1,48 @@
 import pickle
 import requests
 import time
+import json
 import spacy
 from spacy import displacy
 from Levenshtein import distance as lev
-from spacy.pipeline import EntityRuler
-
-nlp = spacy.load("en_core_web_lg")
-with open('patterns.pickle')
-
-ruler = EntityRuler(nlp)
-ruler.add_patterns(pattern)
-
-
+nlp = spacy.load("en_core_web_sm")
 
 def main():
-    questions = ['Who are the screenwriters for The Place Beyond The Pines?', 
-                'Who were the composers for Batman Begins?',
-                'What awards did Frozen receive?',
-                'How many awards did Frozen receive?']
+    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
+                #'Who were the composers for Batman Begins?',
+                #'What awards did Frozen receive?',
+                #'How many awards did Frozen receive?',
+                #'How old is Jim Carrey?',
+                'Which company distributed Avatar?',
+                'Who is Leonardo di Caprio?',
+                "What is James Bond catchphrase?"]
+
+    links = readJson('property_links.json')
     for question in questions:
         print(question)
-        answer = ask(question, debug=True)
+        answer = ask(question, links, debug=True)
         print(answer)
+
+def ask(question, links, debug=False):
+    parse = nlp(question)
+    ent = getEnt(parse)
+    if len(ent) > 0:
+        search_props = removeStopWords(question, ent[0])
+        print("Search properties: " , search_props)
+        ent_ids = getEntIds(ent)
+
+        linked_prop = getBestProp(search_props, links)
+        print("Linked properties: " , linked_prop)
+
+        properties = getProperties(ent_ids[0])
+
+        for p, v in properties.items():
+            print(p, " : ", v)
+
+        return properties[linked_prop]
+    else:
+        print('No entities found!')
+        return [0]
 
 def execQuery(query, url):
     req = requests.get(url, params={'query': query, 'format': 'json'})
@@ -59,72 +79,10 @@ def getIds(json):
         print('Error Occurred')
         print(json)
 
-def ask(question, debug=False):
-    parse = nlp(question)
-    ent = getEnt(parse)
-    prop = removeStopWords(question, ent[0])
-    #print("Properties: " + prop)
-    ent_ids = getEntIds(ent)
-
-    properties = getProperties(ent_ids[0])
-
-    return getAnswer(prop, properties)
-
-    return 0
-
-    if "how many" in question.lower():
-        w = "how many"
-    else:
-        w = question.split()[0].lower()
-    if debug:
-        print(w, " | ", ent)
-    if ent == '':
-        print('Could not find entities.')
-    else:
-        ent_ids = getEntIds(ent)
-        getPredicates(ent_ids[0])
-        if debug:
-            print(p_ids, q_ids)
-
-        return getAnswer(w, p_ids, q_ids)
-    return ent
-
-def getAnswer(w, p_ids, q_ids):
-    url = 'https://query.wikidata.org/sparql'
-    
-    if w == 'when':
-        q_ids = [(q_id, q_label) for q_id, q_label in q_ids if 'date' in q_label.lower().split()]
-    elif w == 'where':
-        q_ids = [(q_id, q_label) for q_id, q_label in q_ids if 'place' in q_label.lower().split()]
-    
-    for p_id_list in p_ids:
-        p_id = p_id_list[0]
-        for q_id_list in q_ids:
-            q_id = q_id_list[0]
-            
-            if (w == "how many"):
-                query = "SELECT (COUNT(?x) as ?count) WHERE {wd:" + p_id + " wdt:" + q_id + " ?x. SERVICE wikibase:label { bd:serviceParam wikibase:language '[AUTO_LANGUAGE],en'. }}"
-                query2 = "SELECT (COUNT(?x) as ?count) WHERE {?x wdt:" + q_id + " wd:" + p_id + ". SERVICE wikibase:label { bd:serviceParam wikibase:language '[AUTO_LANGUAGE],en'. }}"
-            else:
-                query = "SELECT ?xLabel WHERE {wd:" + p_id + " wdt:" + q_id + " ?x. SERVICE wikibase:label { bd:serviceParam wikibase:language '[AUTO_LANGUAGE],en'. }}"
-                query2 = "SELECT ?xLabel WHERE {?x wdt:" + q_id + " wd:" + p_id + ". SERVICE wikibase:label { bd:serviceParam wikibase:language '[AUTO_LANGUAGE],en'. }}"
-            
-
-            try:
-                answer = execQuery(query, url)
-                if len(answer) != 0:
-                    return answer
-                else:
-                    answer = execQuery(query2, url)
-                    if len(answer) != 0:
-                        return answer
-            except:
-                query = "SELECT ?label WHERE {wd:" + p_id + " wdt:" + q_id + " ?label.}"
-                answer = execQuery(query, url)
-                if len(answer) != 0:
-                    return answer
-
-
+def readJson(filename):
+    with open(filename, 'r') as f:
+        return json.load(f)
+                
 def getEnt(parse):
     entity = list()
 
@@ -135,12 +93,26 @@ def getEnt(parse):
 
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
-    no_stop_words = [word.text for word in nlp(question) 
+    no_stop_words = [word for word in nlp(question)
                         if not word.is_stop and word.pos_ != 'PUNCT' 
                         and word.text != ' ']
     print(no_stop_words)
 
-    return " ".join(no_stop_words)
+    return no_stop_words
+
+
+def getBestProp(search_props, links):
+    same_prop_counts = {}
+    for prop, related_props in links.items():
+        #print(prop, related_props)
+        same_props = [search_prop.lemma_ for search_prop in search_props if search_prop.lemma_ in related_props]
+        same_prop_amount = len(same_props)
+        same_prop_counts[same_prop_amount] = prop
+
+    #print(same_prop_counts)
+    max_key = max(same_prop_counts.keys())
+
+    return same_prop_counts[max_key]
 
 
 def getAnswer(search_pred, properties):
