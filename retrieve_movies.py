@@ -2,6 +2,7 @@ import pickle
 import requests
 import re
 
+
 def main():
     pattern_list = list()
     url = 'https://query.wikidata.org/sparql'
@@ -11,8 +12,9 @@ def main():
         if re.match(r"^Q[0-9]+", result['workLabel']['value']):
             continue
         pattern_list.append({"label": "MOVIE", "pattern": result['workLabel']['value']})
-    with open('patterns.pickle', 'wb') as file:
-        pickle.dump(pattern_list, file)
+    print(pattern_list)
+    with open('patterns.pickle', 'wb') as f:
+        pickle.dump(pattern_list, f)
 
 
 if __name__ == "__main__":
