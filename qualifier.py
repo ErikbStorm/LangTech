@@ -5,10 +5,12 @@ import requests
 def main():
     nlp = spacy.load('en_core_web_md')
     nlp.add_pipe('entityLinker', last=True)
-    question = input('Please ask a question:\n')
-    parse = nlp(question)
-    entities = parse._.linkedEntities
-    verb_dict = {'played': ('actor', 'role'), 'won': ('award', 'winner'), 'released': ('release date', 'publication place')}
+    #question = input('Please ask a question:\n')
+    parse = nlp("What movie won best picture in the 2020 Academy Awards?")
+    for sent in parse.sents:
+        sent._.linkedEntities.pretty_print()
+    #entities = parse._.linkedEntities.pretty_print()
+    verb_dict = {'play': ('actor', 'role'), 'won': ('award', 'winner'), 'release': ('release date', 'publication place')}
     if len(entities) == 2:
         for word in parse:
             if word.dep_ == 'root' and word.lemma_ in verb_dict:

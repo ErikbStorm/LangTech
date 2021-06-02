@@ -1,15 +1,14 @@
-
+import pickle
 import requests
 import time
 import json
 import spacy
 from spacy import displacy
 from Levenshtein import distance as lev
-
 nlp = spacy.load("en_core_web_sm")
 
 def main():
-    questions = [#'Who are the screenwriters for The Place Beyond The Pines?', 
+    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
                 #'Who were the composers for Batman Begins?',
                 #'What awards did Frozen receive?',
                 #'How many awards did Frozen receive?',
@@ -19,6 +18,10 @@ def main():
                 #"What is James Bond catchphrase?",
                 "Where did Brad Pitt go to school?"]
                 
+                'Which company distributed Avatar?',
+                'Who is Leonardo di Caprio?',
+                "What is James Bond catchphrase?"]
+
     links = readJson('property_links.json')
     for question in questions:
         print(question)
@@ -86,11 +89,16 @@ def readJson(filename):
         return json.load(f)
                 
 def getEnt(parse):
-     return [ent.text for ent in parse.ents]
+    entity = list()
+
+    for word in parse[1:]:
+        if word.text.istitle() or word.text[0].isdigit():
+            entity.append(int(word.i))
+    return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
 
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
-    no_stop_words = [word for word in nlp(question) 
+    no_stop_words = [word for word in nlp(question)
                         if not word.is_stop and word.pos_ != 'PUNCT' 
                         and word.text != ' ']
     print(no_stop_words)
@@ -105,7 +113,7 @@ def getBestProp(search_props, links):
         same_props = [search_prop.lemma_ for search_prop in search_props if search_prop.lemma_ in related_props]
         same_prop_amount = len(same_props)
         same_prop_counts[same_prop_amount] = prop
-    
+
     #print(same_prop_counts)
     max_key = max(same_prop_counts.keys())
 
