@@ -4,8 +4,17 @@ import time
 import json
 import spacy
 from spacy import displacy
+from spacy import EntityRuler
 from Levenshtein import distance as lev
+
 nlp = spacy.load("en_core_web_sm")
+ruler = EntityRuler(nlp)
+pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
+for p in pickles:
+    with open(p, 'rb') as f:
+        pattern = pickle.load(f)
+        ruler.add_pattern(pattern)
+nlp.add_pipe(ruler)
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
