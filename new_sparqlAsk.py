@@ -1,10 +1,18 @@
-
+import pickle
 import requests
 import time
 import spacy
 from spacy import displacy
 from Levenshtein import distance as lev
-nlp = spacy.load("en_core_web_sm")
+from spacy.pipeline import EntityRuler
+
+nlp = spacy.load("en_core_web_lg")
+with open('patterns.pickle')
+
+ruler = EntityRuler(nlp)
+ruler.add_patterns(pattern)
+
+
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?', 
@@ -79,7 +87,7 @@ def ask(question, debug=False):
             print(p_ids, q_ids)
 
         return getAnswer(w, p_ids, q_ids)
-
+    return ent
 
 def getAnswer(w, p_ids, q_ids):
     url = 'https://query.wikidata.org/sparql'
@@ -115,9 +123,15 @@ def getAnswer(w, p_ids, q_ids):
                 answer = execQuery(query, url)
                 if len(answer) != 0:
                     return answer
-                
+
+
 def getEnt(parse):
-     return [ent.text for ent in parse.ents]
+    entity = list()
+
+    for word in parse[1:]:
+        if word.text.istitle() or word.text[0].isdigit():
+            entity.append(int(word.i))
+    return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
 
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
