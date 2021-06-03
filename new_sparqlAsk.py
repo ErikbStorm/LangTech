@@ -4,31 +4,57 @@ import time
 import json
 import spacy
 from spacy import displacy
+from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
+
 nlp = spacy.load("en_core_web_sm")
+ruler = EntityRuler(nlp)
+pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
+for p in pickles:
+    with open(p, 'rb') as f:
+        pattern = pickle.load(f)
+        ruler.add_patterns(pattern)
+nlp.add_pipe(ruler)
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
-                #'Who were the composers for Batman Begins?',
+                # 'Who were the composers for Batman Begins?',
                 #'What awards did Frozen receive?',
                 #'How many awards did Frozen receive?',
                 #'How old is Jim Carrey?',
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo di Caprio?',
+                # "What is James Bond catchphrase?",
+                # "Is Brad Pitt female?",
+                "Did Frozen win an award?",
+                
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 "Where did Brad Pitt go to school?",
-                "Who is Brad Pitt?"]
+                "Who is Brad Pitt?",
+                "Where did Brad Pitt go to school?",
+                
+                'Which company distributed Avatar?',
+                'Who is Leonardo di Caprio?',
+                "What is James Bond catchphrase?",
+                ]
 
     links = readJson('property_links.json')
     for question in questions:
         print(question)
         answer = ask(question, links, debug=True)
-        print(answer)
+        print(f"Answer: {answer}")
 
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
     if len(ent) > 0:
+        if parse[0].pos_ == 'AUX':
+            return askYesNo(parse=parse,
+                            ent=ent,
+                            question=question, 
+                            links=links)
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
@@ -46,6 +72,31 @@ def ask(question, links, debug=False):
     else:
         print('No entities found!')
         return [0]
+
+
+def askYesNo(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+    
+    for p, v in properties.items():
+            print(p, " : ", v)
+    
+    print(f"Linkded prop: {properties[linked_prop][0]}")
+    if parse[0].text == 'Is':
+        for prop in search_props:
+            if properties[linked_prop][0] == prop.text:
+                return "Yes"
+    else:
+        if properties[linked_prop][0]:
+            return "Yes"
+    return "No"
+    
 
 def execQuery(query, url):
     '''
@@ -99,7 +150,8 @@ def readJson(filename):
                 
 def getEnt(parse):
     entity = list()
-
+    for ent in parse.ents:
+        print(ent)
     for word in parse[1:]:
         if word.text.istitle() or word.text[0].isdigit():
             entity.append(int(word.i))
