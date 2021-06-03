@@ -4,7 +4,7 @@ import time
 import json
 import spacy
 from spacy import displacy
-from spacy import EntityRuler
+from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
@@ -136,7 +136,8 @@ def readJson(filename):
                 
 def getEnt(parse):
     entity = list()
-
+    for ent in parse.ents:
+        print(ent)
     for word in parse[1:]:
         if word.text.istitle() or word.text[0].isdigit():
             entity.append(int(word.i))
