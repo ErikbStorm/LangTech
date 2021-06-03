@@ -51,6 +51,13 @@ def ask(question, links, debug=False):
                             ent=ent,
                             question=question,
                             links=links)
+
+        if "how many" in question.lower() or "count" in question.lower():
+            return askCount(parse=parse,
+                            ent=ent,
+                            question=question,
+                            links=links)
+
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
@@ -79,6 +86,17 @@ def ask(question, links, debug=False):
         print('No entities found!')
         return [0]
 
+def askCount(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+
+    return len(properties[linked_prop])
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
@@ -88,15 +106,25 @@ def askYesNo(parse, ent, question, links):
     linked_prop = getBestProp(search_props, links)
     print("Linked properties: " , linked_prop)
 
+    # for token in parse:
+    #     print(f"Lemma: {token.lemma_}")
+
+    if len(ent_ids) == 0:
+        return "No entities found"
     properties = getProperties(ent_ids[0])
     
     #for p, v in properties.items():
     #        print(p, " : ", v)
     
-    print(f"Linkded prop: {properties[linked_prop][0]}")
+    print(f"Linkded prop: {properties[linked_prop]}")
     if parse[0].text == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop.text:
+                return "Yes"
+            if prop.text in properties[linked_prop][0]:
+                return "Yes"
+        for token in parse:
+            if token.pos_ == "ADJ":
                 return "Yes"
     else:
         if properties[linked_prop][0]:
@@ -222,9 +250,10 @@ def getBestProp(search_props, links):
         same_prop_counts[same_prop_amount] = prop
 
     print(same_prop_counts)
-    #max_key = max(same_prop_counts.keys())
+    max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts
+    return same_prop_counts[max_key]
+    # return same_prop_counts
 
 
 def getAnswer(search_pred, properties):
