@@ -16,11 +16,8 @@ def main():
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?"]
-                
-                'Which company distributed Avatar?',
-                'Who is Leonardo di Caprio?',
-                "What is James Bond catchphrase?"]
+                "Where did Brad Pitt go to school?",
+                "Who is Brad Pitt?"]
 
     links = readJson('property_links.json')
     for question in questions:
@@ -32,17 +29,18 @@ def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
     if len(ent) > 0:
-        search_props = removeStopWords(question, ent[0])
+        search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
         linked_prop = getBestProp(search_props, links)
         print("Linked properties: " , linked_prop)
 
+        print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
 
-        for p, v in properties.items():
-            print(p, " : ", v)
+        #for p, v in properties.items():
+        #    print(p, " : ", v)
 
         return properties[linked_prop]
     else:
@@ -50,13 +48,24 @@ def ask(question, links, debug=False):
         return [0]
 
 def execQuery(query, url):
+    '''
+        Executes a query given the url and query.
+        @param query string containing the query.
+        @param url a string with containing the url
+
+        @return dictionary containing the request answer.
+    '''
     req = requests.get(url, params={'query': query, 'format': 'json'})
     if req.status_code == 429:
         print('Too many requests, retrying....')
         time.sleep(5)
         return execQuery(query, url)
-    else:
+    if req.status_code == 200:
         results = req.json()
+    else:
+        print('Something went wrong, retrying...')
+        time.sleep(5)
+        return execQuery(query, url)
 
     return results
     
@@ -99,8 +108,8 @@ def getEnt(parse):
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
-                        if not word.is_stop and word.pos_ != 'PUNCT' 
-                        and word.text != ' ']
+                        if (not word.is_stop and word.pos_ != 'PUNCT' 
+                        and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
@@ -110,11 +119,11 @@ def getBestProp(search_props, links):
     same_prop_counts = {}
     for prop, related_props in links.items():
         #print(prop, related_props)
-        same_props = [search_prop.lemma_ for search_prop in search_props if search_prop.lemma_ in related_props]
+        same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
         same_prop_amount = len(same_props)
         same_prop_counts[same_prop_amount] = prop
 
-    #print(same_prop_counts)
+    print(same_prop_counts)
     max_key = max(same_prop_counts.keys())
 
     return same_prop_counts[max_key]
