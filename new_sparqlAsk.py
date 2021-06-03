@@ -49,6 +49,7 @@ def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
     if len(ent) == 1:
+        ent = ent[0]
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
@@ -59,7 +60,7 @@ def ask(question, links, debug=False):
         ent_ids = getEntIds(ent)
 
         linked_prop = getBestProp(search_props, links)
-        print("Linked properties: " , linked_proentp)
+        print("Linked properties: " , linked_prop)
 
         print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
@@ -69,7 +70,15 @@ def ask(question, links, debug=False):
 
         return properties[linked_prop]
     elif len(ent) == 2:
-        print('fuck')
+        search_props = removeStopWords2(question, ent)
+        print("Search properties: ", search_props)
+        for i in range(len(ent)):
+            ent_ids = getEntIds(ent[i])
+            linked_prop = getBestProp(search_props, links)
+            print("Linked properties: ", linked_prop)
+
+            print("entity ids: ", ent_ids)
+            properties = getProperties(ent_ids[0])
     else:
         print('No entities found!')
         return [0]
@@ -157,16 +166,27 @@ def getEnt(parse):
         for word in parse[1:]:
             if word.text.istitle() or word.text[0].isdigit():
                 entity.append(int(word.i))
-        return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
+        return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
     else:
         for ent in parse.ents:
             entity.append(ent)
     return entity
 
+
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
-                        if (not word.is_stop and word.pos_ != 'PUNCT' 
+                     if (not word.is_stop and word.pos_ != 'PUNCT'
+                         and word.text != ' ') or word.i == 0]
+    print(no_stop_words)
+
+    return no_stop_words
+
+def removeStopWords2(question, ent):
+    for e in ent:
+        question = question.replace(e, '')
+    no_stop_words = [word for word in nlp(question)
+                        if (not word.is_stop and word.pos_ != 'PUNCT'
                         and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
