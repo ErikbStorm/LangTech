@@ -25,18 +25,18 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-                "Did Frozen win an award?",
-                
+                #"Did Frozen win an award?",
+                #"Did Frozen win any awards?",
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?",
-                "Who is Brad Pitt?",
-                "Where did Brad Pitt go to school?",
-                
-                'Which company distributed Avatar?',
-                'Who is Leonardo di Caprio?',
-                "What is James Bond catchphrase?",
+                #"Where did Brad Pitt go to school?",
+                "Who played Frodo Baggins?",
+                #"Where did Brad Pitt go to school?",
+
+                #'Which company distributed Avatar?',
+                #'Who is Leonardo di Caprio?',
+                #"What is James Bond catchphrase?",
                 ]
 
     links = readJson('property_links.json')
@@ -59,16 +59,16 @@ def ask(question, links, debug=False):
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
-        linked_prop = getBestProp(search_props, links)
-        print("Linked properties: " , linked_prop)
+        linked_props = getBestProp(search_props, links)
+        print("Linked properties: " , linked_props)
 
         print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
 
-        #for p, v in properties.items():
-        #    print(p, " : ", v)
+        for p, v in properties.items():
+            print(p, " : ", v)
 
-        return properties[linked_prop]
+        return findPropCombo(linked_props, properties)
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         print("Search properties: ", search_props)
@@ -94,8 +94,8 @@ def askYesNo(parse, ent, question, links):
 
     properties = getProperties(ent_ids[0])
     
-    for p, v in properties.items():
-            print(p, " : ", v)
+    #for p, v in properties.items():
+    #        print(p, " : ", v)
     
     print(f"Linkded prop: {properties[linked_prop][0]}")
     if parse[0].text == 'Is':
@@ -107,6 +107,23 @@ def askYesNo(parse, ent, question, links):
             return "Yes"
     return "No"
     
+def findPropCombo(linked_props, properties):
+    '''
+        Checks what the best property for the linked properties is.
+        Will return the final answer.
+    '''
+    #Checks if there are no linked props left
+    if len(linked_props) == 0:
+        return []
+    else:
+        best_Linked_prop_index = max(linked_props.keys())
+        best_Linked_prop = linked_props[best_Linked_prop_index]
+        #print(properties[best_Linked_prop])
+        if best_Linked_prop in properties:
+            return properties[best_Linked_prop]
+        else:
+            del linked_props[best_Linked_prop]
+            return findPropCombo(linked_props, properties)
 
 def execQuery(query, url):
     '''
@@ -174,6 +191,9 @@ def getEnt(parse):
 
 
 def removeStopWords(question, ent):
+    '''
+        Takes in a question in string form and return a list with spacy objects.
+    '''
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
                      if (not word.is_stop and word.pos_ != 'PUNCT'
@@ -198,13 +218,14 @@ def getBestProp(search_props, links):
     for prop, related_props in links.items():
         #print(prop, related_props)
         same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
+        #print(same_props)
         same_prop_amount = len(same_props)
         same_prop_counts[same_prop_amount] = prop
 
     print(same_prop_counts)
-    max_key = max(same_prop_counts.keys())
+    #max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts[max_key]
+    return same_prop_counts
 
 
 def getAnswer(search_pred, properties):
