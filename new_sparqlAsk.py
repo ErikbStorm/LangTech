@@ -26,16 +26,19 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-                "Did Frozen win an award?",
-                
+                # "Did Frozen win an award?",
+                # "Is Alan Rickman dead?",
+                # "Did Kate Winslet act in 16 movies?",
+                "Is The Incredibles movie animated?",
+                "Is Die Hard a Christmas film?"
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?"
+                # "Where did Brad Pitt go to school?"
                 
-                'Which company distributed Avatar?',
-                'Who is Leonardo di Caprio?',
-                "What is James Bond catchphrase?",
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo di Caprio?',
+                # "What is James Bond catchphrase?",
                 ]
 
     links = readJson('property_links.json')
@@ -79,15 +82,23 @@ def askYesNo(parse, ent, question, links):
     linked_prop = getBestProp(search_props, links)
     print("Linked properties: " , linked_prop)
 
+    for token in parse:
+        print(f"Lemma: {token.lemma_}")
+    
     properties = getProperties(ent_ids[0])
     
-    for p, v in properties.items():
-            print(p, " : ", v)
+    # for p, v in properties.items():
+    #         print(p, " : ", v)
     
     print(f"Linkded prop: {properties[linked_prop][0]}")
     if parse[0].text == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop.text:
+                return "Yes"
+            if prop.text in properties[linked_prop][0]:
+                return "Yes"
+        for token in parse:
+            if token.pos_ == "ADJ":
                 return "Yes"
     else:
         if properties[linked_prop][0]:
