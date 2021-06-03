@@ -17,7 +17,8 @@ def evalQuestions(filename, write=False):
             corr_answers = [answ.strip() for answ in row[2:]]
 
             print(question)
-            sys_answers = new_sparqlAsk.ask(question)
+            links = new_sparqlAsk.readJson('property_links.json')
+            sys_answers = new_sparqlAsk.ask(question, links, debug=False)
             score = evaluate(sys_answers, corr_answers)
             print(sys_answers, corr_answers)
             print(score)

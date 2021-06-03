@@ -1,43 +1,38 @@
-import pickle
 import requests
 import time
 import json
 import spacy
-from spacy import displacy
 from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("entity_ruler")
-pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-for p in pickles:
-    with open(p, 'rb') as f:
-        pattern = pickle.load(f)
-        ruler.add_patterns(pattern)
+ruler.from_disk("patterns.jsonl")
 
 def main():
-    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
-                # 'Who were the composers for Batman Begins?',
-                #'What awards did Frozen receive?',
-                #'How many awards did Frozen receive?',
-                #'How old is Jim Carrey?',
-                # 'Which company distributed Avatar?',
-                # 'Who is Leonardo di Caprio?',
-                # "What is James Bond catchphrase?",
-                # "Is Brad Pitt female?",
-                #"Did Frozen win an award?",
-                #"Did Frozen win any awards?",
-                #'Which company distributed Avatar?',
-                #'Who is the mommy of Leonardo di Caprio?',
-                #"What is James Bond catchphrase?",
-                #"Where did Brad Pitt go to school?",
+    questions = ['Who are the screenwriters for The Place Beyond The Pines?',
+                 'Who were the composers for Batman Begins?',
+                'What awards did Frozen receive?',
+                'How many awards did Frozen receive?',
+                'How old is Jim Carrey?',
+                 'Which company distributed Avatar?',
+                 'Who is Leonardo diCaprio?',
+                 "What is James Bond catchphrase?",
+                 "Is Brad Pitt female?",
+                "Did Frozen win an award?",
+                "Did Frozen win any awards?",
+                'Which company distributed Avatar?',
+                'Who is the mommy of Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "Where did Brad Pitt go to school?",
                 "Who played Frodo Baggins?",
-                #"Where did Brad Pitt go to school?",
+                "Where did Brad Pitt go to school?",
 
-                #'Which company distributed Avatar?',
-                #'Who is Leonardo di Caprio?',
-                #"What is James Bond catchphrase?",
-                ]
+                'Which company distributed Avatar?',
+                'Who is Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "In what aspect ratio was Zack Snyder's Justice League shot?"
+                 ]
 
     links = readJson('property_links.json')
     for question in questions:
@@ -48,12 +43,13 @@ def main():
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
+    print(ent)
     if len(ent) == 1:
         ent = ent[0]
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
-                            question=question, 
+                            question=question,
                             links=links)
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
@@ -183,10 +179,13 @@ def getEnt(parse):
         for word in parse[1:]:
             if word.text.istitle() or word.text[0].isdigit():
                 entity.append(int(word.i))
-        return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
+        if entity:
+            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        else:
+            return entity
     else:
         for ent in parse.ents:
-            entity.append(ent)
+            entity.append(ent.text)
     return entity
 
 
