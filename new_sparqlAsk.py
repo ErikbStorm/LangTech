@@ -15,7 +15,7 @@ ruler = nlp.add_pipe("entity_ruler")
 #         pattern = pickle.load(f)
 #         ruler.add_patterns(pattern)
 patterns = [
-    {"label": "MOVIE", "pattern": "Die Hard"},
+    # {"label": "MOVIE", "pattern": "Die Hard"},
     {"label": "MOVIE", "pattern": "Hot Dog"}
 ]
 ruler.add_patterns(patterns)
@@ -30,14 +30,15 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-                "Did Frozen win an award?",
-                "Did Die Hard win an award?",
+                # "Did Frozen win an award?",
+                # "Did Die Hard win an award?",
                 # "Is Alan Rickman dead?",
                 # "Did Kate Winslet act in 16 movies?",
                 # "Is The Incredibles movie animated?",
                 # "Is Frozen a Christmas film?",
-                "Did Die Hard pass the Bechdel test?",
-                "Does Walt Disney Productions own Beauty and the Beast?",
+                "Is Die Hard a Christmas film?",
+                # "Did Die Hard pass the Bechdel test?",
+                # "Does Walt Disney Productions own Beauty and the Beast?",
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
@@ -129,7 +130,7 @@ def askYesNo(parse, ent, question, links):
     #for p, v in properties.items():
     #        print(p, " : ", v)
     
-    print(f"Linkded prop: {properties[linked_prop][0]}")
+    print(f"Linkded prop: {properties[linked_prop]}")
     if parse[0].text == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop.text:
@@ -223,7 +224,7 @@ def getEnt(parse):
         return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
     else:
         for ent in parse.ents:
-            entity.append(ent)
+            entity.append(ent.text)
     return entity
 
 
@@ -260,9 +261,10 @@ def getBestProp(search_props, links):
         same_prop_counts[same_prop_amount] = prop
 
     print(same_prop_counts)
-    #max_key = max(same_prop_counts.keys())
+    max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts
+    return same_prop_counts[max_key]
+    # return same_prop_counts
 
 
 def getAnswer(search_pred, properties):
