@@ -57,12 +57,11 @@ def ask(question, links, debug=False):
                             question=question, 
                             links=links)
 
-        if "how many" in question.lower() | "count" in question.lower():
+        if "how many" in question.lower() or "count" in question.lower():
             return askCount(parse=parse,
                             ent=ent,
                             question=question, 
                             links=links)
-
 
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
