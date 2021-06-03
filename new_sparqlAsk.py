@@ -37,6 +37,7 @@ def main():
                 #'Which company distributed Avatar?',
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
+                "How many awards did Frozen win?"
                 ]
 
     links = readJson('property_links.json')
@@ -55,6 +56,14 @@ def ask(question, links, debug=False):
                             ent=ent,
                             question=question, 
                             links=links)
+
+        if "how many" in question.lower() | "count" in question.lower():
+            return askCount(parse=parse,
+                            ent=ent,
+                            question=question, 
+                            links=links)
+
+
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
@@ -83,6 +92,17 @@ def ask(question, links, debug=False):
         print('No entities found!')
         return [0]
 
+def askCount(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+
+    return len(properties[linked_prop])
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
