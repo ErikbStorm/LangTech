@@ -1,6 +1,6 @@
 {
     "date of birth" : ["old", "born", "date", "birth", "when"],
-    "award received" : ["award", "receive"],
+    "award received" : ["award", "receive", "win"],
     "composer" : ["composer", "compose", "write", "music"],
     "genre" : ["kind", "film", "genre", "type", "Christmas"],
     "director" : ["direct", "director"],
@@ -10,7 +10,7 @@
     "screenwriter": ["screenwriter", "write", "writer"],
     "duration": ["duration", "length", "long"],
     "review score": ["review", "score", "rating"],
-    "catchphrase" : ["catchphrase"],
+    "catchphrase" : ["catchphrase", "what"],
     "number of episodes" : ["number", "episode"],
     "member of political party" : ["member", "political", "party"],
     "native language" : ["native", "language"],
@@ -50,7 +50,7 @@
     "main subject": ["subject", "topic", "about", "main", "issue", "theme","regard", "term", "describe", "mention"],
     "cast member": ["cast", "member", "play", "in", "actor", "actrice" ,"who", "act"],
     "film editor": ["editor", "edit"],
-    "performer": ["perform", "performer", "artist", "record", "musician"],
+    "performer": ["perform", "performer", "artist", "record", "musician", "actor", "play", "who"],
     "Kijkwijzer rating": ["rating", "kijkwijzer", "wijzer", "age", "allow", "permit"],
     "filming location": ["film", "location", "where", "place", "set"],
     "follows": ["follows", "successor", "succeed"],
@@ -71,6 +71,6 @@
     "date of death": ["when", "die", "death"],
     "cause of death": ["how", "die", "death"],
     "place of death": ["where", "die", "death"],
-    "test taken": ["Bechdel", "test", "reverse"]
+    "test taken": ["Bechdel", "test", "reverse"],
+    "named after" : ["name", "after"]
 }
-

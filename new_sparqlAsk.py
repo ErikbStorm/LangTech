@@ -7,6 +7,7 @@ from spacy import displacy
 from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
+<<<<<<< HEAD
 nlp = spacy.load("en_core_web_trf")
 ruler = nlp.add_pipe("entity_ruler")
 # pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
@@ -19,6 +20,15 @@ patterns = [
     {"label": "MOVIE", "pattern": "Hot Dog"}
 ]
 ruler.add_patterns(patterns)
+=======
+nlp = spacy.load("en_core_web_sm")
+ruler = nlp.add_pipe("entity_ruler")
+pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
+for p in pickles:
+    with open(p, 'rb') as f:
+        pattern = pickle.load(f)
+        ruler.add_patterns(pattern)
+>>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
@@ -30,6 +40,7 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
+<<<<<<< HEAD
                 "Did Frozen win an award?",
                 "Did Die Hard win an award?",
                 # "Is Alan Rickman dead?",
@@ -46,6 +57,21 @@ def main():
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
+=======
+                #"Did Frozen win an award?",
+                #"Did Frozen win any awards?",
+                #'Which company distributed Avatar?',
+                #'Who is the mommy of Leonardo di Caprio?',
+                #"What is James Bond catchphrase?",
+                #"Where did Brad Pitt go to school?",
+                "Who played Frodo Baggins?",
+                #"Where did Brad Pitt go to school?",
+
+                #'Which company distributed Avatar?',
+                #'Who is Leonardo di Caprio?',
+                #"What is James Bond catchphrase?",
+                "How many awards did Frozen win?"
+>>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
                 ]
 
     links = readJson('property_links.json')
@@ -57,29 +83,59 @@ def main():
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
-    if len(ent) > 0:
+    if len(ent) == 1:
+        ent = ent[0]
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
                             question=question, 
                             links=links)
+
+        if "how many" in question.lower() or "count" in question.lower():
+            return askCount(parse=parse,
+                            ent=ent,
+                            question=question, 
+                            links=links)
+
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
-        linked_prop = getBestProp(search_props, links)
-        print("Linked properties: " , linked_prop)
+        linked_props = getBestProp(search_props, links)
+        print("Linked properties: " , linked_props)
 
+        print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
 
         for p, v in properties.items():
             print(p, " : ", v)
 
-        return properties[linked_prop]
+        return findPropCombo(linked_props, properties)
+    elif len(ent) == 2:
+        search_props = removeStopWords2(question, ent)
+        print("Search properties: ", search_props)
+        for i in range(len(ent)):
+            ent_ids = getEntIds(ent[i])
+            linked_prop = getBestProp(search_props, links)
+            print("Linked properties: ", linked_prop)
+
+            print("entity ids: ", ent_ids)
+            properties = getProperties(ent_ids[0])
     else:
         print('No entities found!')
         return [0]
 
+def askCount(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+
+    return len(properties[linked_prop])
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
@@ -96,9 +152,14 @@ def askYesNo(parse, ent, question, links):
         return "No entities found"
     properties = getProperties(ent_ids[0])
     
+<<<<<<< HEAD
     
     # for p, v in properties.items():
     #         print(p, " : ", v)
+=======
+    #for p, v in properties.items():
+    #        print(p, " : ", v)
+>>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
     
     print(f"Linkded prop: {properties[linked_prop][0]}")
     if parse[0].text == 'Is':
@@ -115,15 +176,43 @@ def askYesNo(parse, ent, question, links):
             return "Yes"
     return "No"
     
+def findPropCombo(linked_props, properties):
+    '''
+        Checks what the best property for the linked properties is.
+        Will return the final answer.
+    '''
+    #Checks if there are no linked props left
+    if len(linked_props) == 0:
+        return []
+    else:
+        best_Linked_prop_index = max(linked_props.keys())
+        best_Linked_prop = linked_props[best_Linked_prop_index]
+        #print(properties[best_Linked_prop])
+        if best_Linked_prop in properties:
+            return properties[best_Linked_prop]
+        else:
+            del linked_props[best_Linked_prop]
+            return findPropCombo(linked_props, properties)
 
 def execQuery(query, url):
+    '''
+        Executes a query given the url and query.
+        @param query string containing the query.
+        @param url a string with containing the url
+
+        @return dictionary containing the request answer.
+    '''
     req = requests.get(url, params={'query': query, 'format': 'json'})
     if req.status_code == 429:
         print('Too many requests, retrying....')
         time.sleep(5)
         return execQuery(query, url)
-    else:
+    if req.status_code == 200:
         results = req.json()
+    else:
+        print('Something went wrong, retrying...')
+        time.sleep(5)
+        return execQuery(query, url)
 
     return results
     
@@ -151,23 +240,43 @@ def getIds(json):
         print('Error Occurred')
         print(json)
 
+
 def readJson(filename):
     with open(filename, 'r') as f:
         return json.load(f)
-                
+
+
 def getEnt(parse):
     entity = list()
+    if not parse.ents:
+        for word in parse[1:]:
+            if word.text.istitle() or word.text[0].isdigit():
+                entity.append(int(word.i))
+        return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
+    else:
+        for ent in parse.ents:
+            entity.append(ent)
+    return entity
 
-    for word in parse[1:]:
-        if word.text.istitle() or word.text[0].isdigit():
-            entity.append(int(word.i))
-    return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
 
 def removeStopWords(question, ent):
+    '''
+        Takes in a question in string form and return a list with spacy objects.
+    '''
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
-                        if not word.is_stop and word.pos_ != 'PUNCT' 
-                        and word.text != ' ']
+                     if (not word.is_stop and word.pos_ != 'PUNCT'
+                         and word.text != ' ') or word.i == 0]
+    print(no_stop_words)
+
+    return no_stop_words
+
+def removeStopWords2(question, ent):
+    for e in ent:
+        question = question.replace(e, '')
+    no_stop_words = [word for word in nlp(question)
+                        if (not word.is_stop and word.pos_ != 'PUNCT'
+                        and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
@@ -177,14 +286,15 @@ def getBestProp(search_props, links):
     same_prop_counts = {}
     for prop, related_props in links.items():
         #print(prop, related_props)
-        same_props = [search_prop.lemma_ for search_prop in search_props if search_prop.lemma_ in related_props]
+        same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
+        #print(same_props)
         same_prop_amount = len(same_props)
         same_prop_counts[same_prop_amount] = prop
 
-    #print(same_prop_counts)
-    max_key = max(same_prop_counts.keys())
+    print(same_prop_counts)
+    #max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts[max_key]
+    return same_prop_counts
 
 
 def getAnswer(search_pred, properties):
