@@ -13,7 +13,7 @@ pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
 for p in pickles:
     with open(p, 'rb') as f:
         pattern = pickle.load(f)
-        ruler.add_pattern(pattern)
+        ruler.add_patterns(pattern)
 nlp.add_pipe(ruler)
 
 def main():
