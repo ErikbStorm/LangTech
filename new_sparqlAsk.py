@@ -4,17 +4,21 @@ import time
 import json
 import spacy
 from spacy import displacy
-from spacy import EntityRuler
+from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_sm")
-ruler = EntityRuler(nlp)
-pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-for p in pickles:
-    with open(p, 'rb') as f:
-        pattern = pickle.load(f)
-        ruler.add_pattern(pattern)
-nlp.add_pipe(ruler)
+nlp = spacy.load("en_core_web_trf")
+ruler = nlp.add_pipe("entity_ruler")
+# pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
+# for p in pickles:
+#     with open(p, 'rb') as f:
+#         pattern = pickle.load(f)
+#         ruler.add_patterns(pattern)
+patterns = [
+    {"label": "MOVIE", "pattern": "Die Hard"},
+    {"label": "MOVIE", "pattern": "Hot Dog"}
+]
+ruler.add_patterns(patterns)
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
@@ -26,11 +30,14 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-                # "Did Frozen win an award?",
+                "Did Frozen win an award?",
+                "Did Die Hard win an award?",
                 # "Is Alan Rickman dead?",
                 # "Did Kate Winslet act in 16 movies?",
-                "Is The Incredibles movie animated?",
-                "Is Die Hard a Christmas film?"
+                # "Is The Incredibles movie animated?",
+                # "Is Frozen a Christmas film?",
+                "Did Die Hard pass the Bechdel test?",
+                "Does Walt Disney Productions own Beauty and the Beast?",
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
@@ -82,10 +89,13 @@ def askYesNo(parse, ent, question, links):
     linked_prop = getBestProp(search_props, links)
     print("Linked properties: " , linked_prop)
 
-    for token in parse:
-        print(f"Lemma: {token.lemma_}")
+    # for token in parse:
+    #     print(f"Lemma: {token.lemma_}")
     
+    if len(ent_ids) == 0:
+        return "No entities found"
     properties = getProperties(ent_ids[0])
+    
     
     # for p, v in properties.items():
     #         print(p, " : ", v)
