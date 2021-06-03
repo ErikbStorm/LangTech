@@ -8,13 +8,12 @@ from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
-ruler = EntityRuler(nlp)
+ruler = nlp.add_pipe("entity_ruler")
 pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
 for p in pickles:
     with open(p, 'rb') as f:
         pattern = pickle.load(f)
         ruler.add_patterns(pattern)
-nlp.add_pipe(ruler)
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
@@ -47,7 +46,7 @@ def main():
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
-    if len(ent) > 0:
+    if len(ent) == 1:
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
@@ -58,7 +57,7 @@ def ask(question, links, debug=False):
         ent_ids = getEntIds(ent)
 
         linked_prop = getBestProp(search_props, links)
-        print("Linked properties: " , linked_prop)
+        print("Linked properties: " , linked_proentp)
 
         properties = getProperties(ent_ids[0])
 
@@ -66,6 +65,8 @@ def ask(question, links, debug=False):
             print(p, " : ", v)
 
         return properties[linked_prop]
+    elif len(ent) == 2:
+        print('fuck')
     else:
         print('No entities found!')
         return [0]
@@ -130,18 +131,23 @@ def getIds(json):
         print('Error Occurred')
         print(json)
 
+
 def readJson(filename):
     with open(filename, 'r') as f:
         return json.load(f)
-                
+
+
 def getEnt(parse):
     entity = list()
-    for ent in parse.ents:
-        print(ent)
-    for word in parse[1:]:
-        if word.text.istitle() or word.text[0].isdigit():
-            entity.append(int(word.i))
-    return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
+    if not parse.ents:
+        for word in parse[1:]:
+            if word.text.istitle() or word.text[0].isdigit():
+                entity.append(int(word.i))
+        return ' '.join([word.text for word in parse[entity[0]:(entity[-1]+1)]])
+    else:
+        for ent in parse.ents:
+            entity.append(ent)
+    return entity
 
 def removeStopWords(question, ent):
     question = question.replace(ent, '')
