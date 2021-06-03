@@ -7,7 +7,6 @@ from spacy import displacy
 from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
-<<<<<<< HEAD
 nlp = spacy.load("en_core_web_trf")
 ruler = nlp.add_pipe("entity_ruler")
 # pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
@@ -20,15 +19,6 @@ patterns = [
     {"label": "MOVIE", "pattern": "Hot Dog"}
 ]
 ruler.add_patterns(patterns)
-=======
-nlp = spacy.load("en_core_web_sm")
-ruler = nlp.add_pipe("entity_ruler")
-pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-for p in pickles:
-    with open(p, 'rb') as f:
-        pattern = pickle.load(f)
-        ruler.add_patterns(pattern)
->>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
@@ -40,7 +30,6 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-<<<<<<< HEAD
                 "Did Frozen win an award?",
                 "Did Die Hard win an award?",
                 # "Is Alan Rickman dead?",
@@ -57,21 +46,6 @@ def main():
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
-=======
-                #"Did Frozen win an award?",
-                #"Did Frozen win any awards?",
-                #'Which company distributed Avatar?',
-                #'Who is the mommy of Leonardo di Caprio?',
-                #"What is James Bond catchphrase?",
-                #"Where did Brad Pitt go to school?",
-                "Who played Frodo Baggins?",
-                #"Where did Brad Pitt go to school?",
-
-                #'Which company distributed Avatar?',
-                #'Who is Leonardo di Caprio?',
-                #"What is James Bond catchphrase?",
-                "How many awards did Frozen win?"
->>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
                 ]
 
     links = readJson('property_links.json')
@@ -152,14 +126,8 @@ def askYesNo(parse, ent, question, links):
         return "No entities found"
     properties = getProperties(ent_ids[0])
     
-<<<<<<< HEAD
-    
-    # for p, v in properties.items():
-    #         print(p, " : ", v)
-=======
     #for p, v in properties.items():
     #        print(p, " : ", v)
->>>>>>> 2ae0209d242706ab2483bbf969adc4f6608b4c9a
     
     print(f"Linkded prop: {properties[linked_prop][0]}")
     if parse[0].text == 'Is':
