@@ -2,10 +2,9 @@ import requests
 import time
 import json
 import spacy
-from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_lg")
 ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
@@ -204,16 +203,17 @@ def readJson(filename):
 def getEnt(parse):
     entity = list()
     if not parse.ents:
-        for word in parse[1:]:
-            if word.text.istitle() or word.text[0].isdigit():
-                entity.append(int(word.i))
-        if entity:
-            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
-        else:
-            return entity
+        return 'FUUUUUCK'
+        # for word in parse[1:]:
+        #     if word.text.istitle() or word.text[0].isdigit():
+        #         entity.append(int(word.i))
+        # if entity:
+        #     return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        # else:
+        #     return entity
     else:
         for ent in parse.ents:
-            entity.append(ent.text)
+            entity.append(ent)
     return entity
 
 
