@@ -8,12 +8,14 @@ from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
-ruler = nlp.add_pipe("entity_ruler")
-pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-for p in pickles:
-    with open(p, 'rb') as f:
-        pattern = pickle.load(f)
-        ruler.add_patterns(pattern)
+
+#ruler = EntityRuler(nlp)
+#pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
+#for p in pickles:
+#    with open(p, 'rb') as f:
+#        pattern = pickle.load(f)
+#        ruler.add_patterns(pattern)
+#nlp.add_pipe(ruler)
 
 def main():
     questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
@@ -32,8 +34,8 @@ def main():
                 #"What is James Bond catchphrase?",
                 #"Where did Brad Pitt go to school?",
                 "Who played Frodo Baggins?",
+                "Which movie was based on the book I Heard You Paint Houses (2004)?",
                 #"Where did Brad Pitt go to school?",
-
                 #'Which company distributed Avatar?',
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
@@ -53,11 +55,11 @@ def ask(question, links, debug=False):
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
-                            question=question, 
+                            question=question,
                             links=links)
-        search_props = removeStopWords(question, ent)
+        search_props = removeStopWords(question, ent.text)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent)
+        ent_ids = getEntIds(ent.text)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
@@ -65,15 +67,15 @@ def ask(question, links, debug=False):
         print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
 
-        for p, v in properties.items():
-            print(p, " : ", v)
+        #for p, v in properties.items():
+        #    print(p, " : ", v)
 
         return findPropCombo(linked_props, properties)
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         print("Search properties: ", search_props)
         for i in range(len(ent)):
-            ent_ids = getEntIds(ent[i])
+            ent_ids = getEntIds(ent[i].text)
             linked_prop = getBestProp(search_props, links)
             print("Linked properties: ", linked_prop)
 
@@ -122,7 +124,7 @@ def findPropCombo(linked_props, properties):
         if best_Linked_prop in properties:
             return properties[best_Linked_prop]
         else:
-            del linked_props[best_Linked_prop]
+            del linked_props[best_Linked_prop_index]
             return findPropCombo(linked_props, properties)
 
 def execQuery(query, url):
@@ -204,7 +206,7 @@ def removeStopWords(question, ent):
 
 def removeStopWords2(question, ent):
     for e in ent:
-        question = question.replace(e, '')
+        question = question.replace(e.text, '')
     no_stop_words = [word for word in nlp(question)
                         if (not word.is_stop and word.pos_ != 'PUNCT'
                         and word.text != ' ') or word.i == 0]

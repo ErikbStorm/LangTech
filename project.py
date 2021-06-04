@@ -9,21 +9,21 @@ def ask(question):
 
 def evalQuestions(filename, write=False):
     output = []
+    links = new_sparqlAsk.readJson('property_links.json')
     with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
         for i, row in enumerate(file):
-            question = row[0]
-            wiki_id = row[1]
-            corr_answers = [answ.strip() for answ in row[2:]]
+            if i > 935 and i < 937:
+                question = row[0]
+                wiki_id = row[1]
+                corr_answers = [answ.strip() for answ in row[2:]]
 
-            print(question)
-            sys_answers = new_sparqlAsk.ask(question)
-            score = evaluate(sys_answers, corr_answers)
-            print(sys_answers, corr_answers)
-            print(score)
-            output.append([question, score, sys_answers])
-            if i > 20:
-                break
+                print(question)
+                sys_answers = new_sparqlAsk.ask(question, links)
+                score = evaluate(sys_answers, corr_answers)
+                print(sys_answers, corr_answers)
+                print(score)
+                output.append([question, score, sys_answers])
     
     #Writing to a file.
     if write:
