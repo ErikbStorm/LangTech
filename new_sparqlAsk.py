@@ -23,19 +23,19 @@ def main():
                 'Who were the composers for Batman Begins?',
                 'What awards did Frozen receive?',
                 'How many awards did Frozen receive?',
-                'How old is Jim Carrey?',
-                'Which company distributed Avatar?',
-                'Who is Leonardo diCaprio?',
-                "What is James Bond catchphrase?",
-                "Is Brad Pitt female?",
-                "Did Frozen win an award?",
-                "Did Frozen win any awards?",
-                'Which company distributed Avatar?',
-                'Who is the mommy of Leonardo diCaprio?',
-                "What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?",
-                "Who played Frodo Baggins?",
-                "Which movie was based on the book I Heard You Paint Houses (2004)?",
+                # 'How old is Jim Carrey?',
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "Is Brad Pitt female?",
+                # "Did Frozen win an award?",
+                # "Did Frozen win any awards?",
+                # 'Which company distributed Avatar?',
+                # 'Who is the mommy of Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "Where did Brad Pitt go to school?",
+                # "Who played Frodo Baggins?",
+                # "Which movie was based on the book I Heard You Paint Houses (2004)?",
                 #"Where did Brad Pitt go to school?",
                 #'Which company distributed Avatar?',
                 #'Who is Leonardo di Caprio?',
@@ -45,11 +45,11 @@ def main():
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?",
-                'Which company distributed Avatar?',
-                'Who is Leonardo diCaprio?',
-                "What is James Bond catchphrase?",
-                "In what aspect ratio was Zack Snyder's Justice League shot?"
+                # "Where did Brad Pitt go to school?",
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "In what aspect ratio was Zack Snyder's Justice League shot?"
                  ]
 
     links = readJson('property_links.json')
@@ -78,7 +78,7 @@ def ask(question, links, debug=False):
 
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent.text)
+        ent_ids = getEntIds(ent)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
@@ -109,12 +109,12 @@ def askCount(parse, ent, question, links):
     print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
-    linked_prop = getBestProp(search_props, links)
-    print("Linked properties: " , linked_prop)
+    linked_props = getBestProp(search_props, links)
+    print("Linked properties: " , linked_props)
 
     properties = getProperties(ent_ids[0])
-
-    return len(properties[linked_prop])
+    
+    return len(findPropCombo(linked_props, properties))
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
@@ -270,8 +270,8 @@ def getBestProp(search_props, links):
     print(same_prop_counts)
     max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts[max_key]
-    # return same_prop_counts
+    #return same_prop_counts[max_key]
+    return same_prop_counts
 
 
 def getAnswer(search_pred, properties):
