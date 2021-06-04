@@ -1,38 +1,39 @@
-import pickle
 import requests
 import time
 import json
 import spacy
-from spacy import displacy
 from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
+ruler = nlp.add_pipe("entity_ruler")
 
-#ruler = EntityRuler(nlp)
-#pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-#for p in pickles:
-#    with open(p, 'rb') as f:
-#        pattern = pickle.load(f)
-#        ruler.add_patterns(pattern)
-#nlp.add_pipe(ruler)
+# Faster testing:
+ruler.from_disk("patterns.jsonl") #comment this one out
+
+# And uncomment these lines below. Add some patterns you like to test.
+# patterns = [
+#     {"label": "MOVIE", "pattern": "Die Hard"},
+#     {"label": "ACTOR", "pattern": "Leonardo DiCaprio"}
+# ]
+# ruler.add_patterns(patterns)
 
 def main():
-    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
-                # 'Who were the composers for Batman Begins?',
-                #'What awards did Frozen receive?',
-                #'How many awards did Frozen receive?',
-                #'How old is Jim Carrey?',
-                # 'Which company distributed Avatar?',
-                # 'Who is Leonardo di Caprio?',
-                # "What is James Bond catchphrase?",
-                # "Is Brad Pitt female?",
-                #"Did Frozen win an award?",
-                #"Did Frozen win any awards?",
-                #'Which company distributed Avatar?',
-                #'Who is the mommy of Leonardo di Caprio?',
-                #"What is James Bond catchphrase?",
-                #"Where did Brad Pitt go to school?",
+    questions = ['Who are the screenwriters for The Place Beyond The Pines?',
+                 'Who were the composers for Batman Begins?',
+                'What awards did Frozen receive?',
+                'How many awards did Frozen receive?',
+                'How old is Jim Carrey?',
+                 'Which company distributed Avatar?',
+                 'Who is Leonardo diCaprio?',
+                 "What is James Bond catchphrase?",
+                 "Is Brad Pitt female?",
+                "Did Frozen win an award?",
+                "Did Frozen win any awards?",
+                'Which company distributed Avatar?',
+                'Who is the mommy of Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "Where did Brad Pitt go to school?",
                 "Who played Frodo Baggins?",
                 "Which movie was based on the book I Heard You Paint Houses (2004)?",
                 #"Where did Brad Pitt go to school?",
@@ -40,6 +41,13 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 ]
+                "Where did Brad Pitt go to school?",
+
+                'Which company distributed Avatar?',
+                'Who is Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "In what aspect ratio was Zack Snyder's Justice League shot?"
+                 ]
 
     links = readJson('property_links.json')
     for question in questions:
@@ -50,6 +58,7 @@ def main():
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
+    print(ent)
     if len(ent) == 1:
         ent = ent[0]
         if parse[0].pos_ == 'AUX':
@@ -57,7 +66,14 @@ def ask(question, links, debug=False):
                             ent=ent,
                             question=question,
                             links=links)
-        search_props = removeStopWords(question, ent.text)
+
+        if "how many" in question.lower() or "count" in question.lower():
+            return askCount(parse=parse,
+                            ent=ent,
+                            question=question,
+                            links=links)
+
+        search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
         ent_ids = getEntIds(ent.text)
 
@@ -85,6 +101,17 @@ def ask(question, links, debug=False):
         print('No entities found!')
         return [0]
 
+def askCount(parse, ent, question, links):
+    search_props = removeStopWords(question, ent)
+    print("Search properties: " , search_props)
+    ent_ids = getEntIds(ent)
+
+    linked_prop = getBestProp(search_props, links)
+    print("Linked properties: " , linked_prop)
+
+    properties = getProperties(ent_ids[0])
+
+    return len(properties[linked_prop])
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
@@ -94,15 +121,25 @@ def askYesNo(parse, ent, question, links):
     linked_prop = getBestProp(search_props, links)
     print("Linked properties: " , linked_prop)
 
+    # for token in parse:
+    #     print(f"Lemma: {token.lemma_}")
+
+    if len(ent_ids) == 0:
+        return "No entities found"
     properties = getProperties(ent_ids[0])
     
     #for p, v in properties.items():
     #        print(p, " : ", v)
     
-    print(f"Linkded prop: {properties[linked_prop][0]}")
+    print(f"Linkded prop: {properties[linked_prop]}")
     if parse[0].text == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop.text:
+                return "Yes"
+            if prop.text in properties[linked_prop][0]:
+                return "Yes"
+        for token in parse:
+            if token.pos_ == "ADJ":
                 return "Yes"
     else:
         if properties[linked_prop][0]:
@@ -185,10 +222,13 @@ def getEnt(parse):
         for word in parse[1:]:
             if word.text.istitle() or word.text[0].isdigit():
                 entity.append(int(word.i))
-        return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
+        if entity:
+            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        else:
+            return entity
     else:
         for ent in parse.ents:
-            entity.append(ent)
+            entity.append(ent.text)
     return entity
 
 
@@ -225,9 +265,10 @@ def getBestProp(search_props, links):
         same_prop_counts[same_prop_amount] = prop
 
     print(same_prop_counts)
-    #max_key = max(same_prop_counts.keys())
+    max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts
+    return same_prop_counts[max_key]
+    # return same_prop_counts
 
 
 def getAnswer(search_pred, properties):

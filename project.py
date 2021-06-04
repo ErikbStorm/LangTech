@@ -18,12 +18,15 @@ def evalQuestions(filename, write=False):
                 wiki_id = row[1]
                 corr_answers = [answ.strip() for answ in row[2:]]
 
-                print(question)
-                sys_answers = new_sparqlAsk.ask(question, links)
-                score = evaluate(sys_answers, corr_answers)
-                print(sys_answers, corr_answers)
-                print(score)
-                output.append([question, score, sys_answers])
+            print(question)
+            links = new_sparqlAsk.readJson('property_links.json')
+            sys_answers = new_sparqlAsk.ask(question, links, debug=False)
+            score = evaluate(sys_answers, corr_answers)
+            print(sys_answers, corr_answers)
+            print(score)
+            output.append([question, score, sys_answers])
+            if i > 20:
+                break
     
     #Writing to a file.
     if write:
