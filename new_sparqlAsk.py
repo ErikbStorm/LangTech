@@ -6,31 +6,50 @@ from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_lg")
 ruler = nlp.add_pipe("entity_ruler")
-ruler.from_disk("patterns.jsonl")
+
+# Faster testing:
+#ruler.from_disk("patterns.jsonl") #comment this one out
+
+# And uncomment these lines below. Add some patterns you like to test.
+patterns = [
+     {"label": "MOVIE", "pattern": "Die Hard"},
+     {"label": "ACTOR", "pattern": "Leonardo DiCaprio"},
+     {"label": "MOVIE", "pattern": "Once Upon a Time in Hollywood"}
+ ]
+ruler.add_patterns(patterns)
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
-                 'Who were the composers for Batman Begins?',
+                'Who were the composers for Batman Begins?',
                 'What awards did Frozen receive?',
                 'How many awards did Frozen receive?',
-                'How old is Jim Carrey?',
-                 'Which company distributed Avatar?',
-                 'Who is Leonardo diCaprio?',
-                 "What is James Bond catchphrase?",
-                 "Is Brad Pitt female?",
-                "Did Frozen win an award?",
-                "Did Frozen win any awards?",
-                'Which company distributed Avatar?',
-                'Who is the mommy of Leonardo diCaprio?',
-                "What is James Bond catchphrase?",
-                "Where did Brad Pitt go to school?",
-                "Who played Frodo Baggins?",
-                "Where did Brad Pitt go to school?",
-
-                'Which company distributed Avatar?',
-                'Who is Leonardo diCaprio?',
-                "What is James Bond catchphrase?",
-                "In what aspect ratio was Zack Snyder's Justice League shot?"
+                # 'How old is Jim Carrey?',
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "Is Brad Pitt female?",
+                # "Did Frozen win an award?",
+                # "Did Frozen win any awards?",
+                # 'Which company distributed Avatar?',
+                # 'Who is the mommy of Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "Where did Brad Pitt go to school?",
+                # "Who played Frodo Baggins?",
+                # "Which movie was based on the book I Heard You Paint Houses (2004)?",
+                #"Where did Brad Pitt go to school?",
+                #'Which company distributed Avatar?',
+                #'Who is Leonardo di Caprio?',
+                #"What is James Bond catchphrase?",
+                # "Where did Brad Pitt go to school?"
+                "How many voice actors worked for Frozen?"
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo di Caprio?',
+                # "What is James Bond catchphrase?",
+                # "Where did Brad Pitt go to school?",
+                # 'Which company distributed Avatar?',
+                # 'Who is Leonardo diCaprio?',
+                # "What is James Bond catchphrase?",
+                # "In what aspect ratio was Zack Snyder's Justice League shot?"
                  ]
 
     links = readJson('property_links.json')
@@ -64,13 +83,16 @@ def ask(question, links, debug=False):
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
 
-        print("entity ids: ", ent_ids)
-        properties = getProperties(ent_ids[0])
+        best_ent_id = getBestEntId(ent, ent_ids)
 
-        for p, v in properties.items():
-            print(p, " : ", v)
+        print("entity ids: ", ent_ids)
+        properties = getProperties(best_ent_id)
+
+        #for p, v in properties.items():
+        #    print(p, " : ", v)
 
         return findPropCombo(linked_props, properties)
+    
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         print("Search properties: ", search_props)
@@ -80,22 +102,24 @@ def ask(question, links, debug=False):
             print("Linked properties: ", linked_prop)
 
             print("entity ids: ", ent_ids)
-            properties = getProperties(ent_ids[0])
+            best_ent_id = getBestEntId(ent[i], ent_ids)
+
+            properties = getProperties(best_ent_id)
     else:
         print('No entities found!')
-        return [0]
+        return []
 
 def askCount(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
     print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
-    linked_prop = getBestProp(search_props, links)
-    print("Linked properties: " , linked_prop)
+    linked_props = getBestProp(search_props, links)
+    print("Linked properties: " , linked_props)
 
     properties = getProperties(ent_ids[0])
-
-    return len(properties[linked_prop])
+    
+    return len(findPropCombo(linked_props, properties))
 
 def askYesNo(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
@@ -129,7 +153,22 @@ def askYesNo(parse, ent, question, links):
         if properties[linked_prop][0]:
             return "Yes"
     return "No"
-    
+
+def getBestEntId(ent_name, ent_ids):
+    '''
+        Finds the entity found by sparql that has the lowest levenshtein distance
+        from the original entity found.
+    '''
+    output = []
+    #print(ent_ids)
+    i = 0
+    for ent_id, found_ent in ent_ids:
+        distance = lev(found_ent, ent_name)
+        output.append((ent_id, found_ent, distance+i))
+        i+=1
+    print(output)
+    return sorted(output, key = lambda x: x[2])[0]
+
 def findPropCombo(linked_props, properties):
     '''
         Checks what the best property for the linked properties is.
@@ -145,7 +184,7 @@ def findPropCombo(linked_props, properties):
         if best_Linked_prop in properties:
             return properties[best_Linked_prop]
         else:
-            del linked_props[best_Linked_prop]
+            del linked_props[best_Linked_prop_index]
             return findPropCombo(linked_props, properties)
 
 def execQuery(query, url):
@@ -223,7 +262,7 @@ def removeStopWords(question, ent):
     '''
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
-                     if (not word.is_stop and word.pos_ != 'PUNCT'
+                     if (word.pos_ != 'PUNCT' # and not word.is_stop
                          and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
@@ -233,7 +272,7 @@ def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
     no_stop_words = [word for word in nlp(question)
-                        if (not word.is_stop and word.pos_ != 'PUNCT'
+                        if (word.pos_ != 'PUNCT' # and not word.is_stop
                         and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
@@ -252,8 +291,8 @@ def getBestProp(search_props, links):
     print(same_prop_counts)
     max_key = max(same_prop_counts.keys())
 
-    return same_prop_counts[max_key]
-    # return same_prop_counts
+    #return same_prop_counts[max_key]
+    return same_prop_counts
 
 
 def getAnswer(search_pred, properties):

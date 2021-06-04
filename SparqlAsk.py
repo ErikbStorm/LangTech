@@ -107,7 +107,7 @@ def getAnswer(w, p_ids, q_ids):
                     return answer
                 
 def getEntPred(question):
-    parse = nlp(question)    
+    parse = nlp(question)
     #displacy.render(parse, jupyter=True, style="ent")
     #displacy.render(parse, jupyter=True, style="dep")
     

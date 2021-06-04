@@ -9,12 +9,14 @@ def ask(question):
 
 def evalQuestions(filename, write=False):
     output = []
+    links = new_sparqlAsk.readJson('property_links.json')
     with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
         for i, row in enumerate(file):
-            question = row[0]
-            wiki_id = row[1]
-            corr_answers = [answ.strip() for answ in row[2:]]
+            if i > 935 and i < 937:
+                question = row[0]
+                wiki_id = row[1]
+                corr_answers = [answ.strip() for answ in row[2:]]
 
             print(question)
             links = new_sparqlAsk.readJson('property_links.json')
