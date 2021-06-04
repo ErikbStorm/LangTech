@@ -1,53 +1,56 @@
-import pickle
 import requests
 import time
 import json
 import spacy
-from spacy import displacy
 from spacy.pipeline import EntityRuler
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_trf")
+nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("entity_ruler")
-# pickles = ['patterns.pickle', 'actors.pickle', 'awards.pickle']
-# for p in pickles:
-#     with open(p, 'rb') as f:
-#         pattern = pickle.load(f)
-#         ruler.add_patterns(pattern)
-patterns = [
-    # {"label": "MOVIE", "pattern": "Die Hard"},
-    {"label": "MOVIE", "pattern": "Hot Dog"}
-]
-ruler.add_patterns(patterns)
+
+# Faster testing:
+ruler.from_disk("patterns.jsonl") #comment this one out
+
+# And uncomment these lines below. Add some patterns you like to test.
+# patterns = [
+#     {"label": "MOVIE", "pattern": "Die Hard"},
+#     {"label": "ACTOR", "pattern": "Leonardo DiCaprio"}
+# ]
+# ruler.add_patterns(patterns)
 
 def main():
-    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
-                # 'Who were the composers for Batman Begins?',
-                #'What awards did Frozen receive?',
-                #'How many awards did Frozen receive?',
-                #'How old is Jim Carrey?',
-                # 'Which company distributed Avatar?',
-                # 'Who is Leonardo di Caprio?',
-                # "What is James Bond catchphrase?",
-                # "Is Brad Pitt female?",
-                # "Did Frozen win an award?",
-                # "Did Die Hard win an award?",
-                # "Is Alan Rickman dead?",
-                # "Did Kate Winslet act in 16 movies?",
-                # "Is The Incredibles movie animated?",
-                # "Is Frozen a Christmas film?",
-                #"Is Die Hard a Christmas film?",
-                # "Did Die Hard pass the Bechdel test?",
-                # "Does Walt Disney Productions own Beauty and the Beast?",
+    questions = ['Who are the screenwriters for The Place Beyond The Pines?',
+                'Who were the composers for Batman Begins?',
+                'What awards did Frozen receive?',
+                'How many awards did Frozen receive?',
+                'How old is Jim Carrey?',
+                'Which company distributed Avatar?',
+                'Who is Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "Is Brad Pitt female?",
+                "Did Frozen win an award?",
+                "Did Frozen win any awards?",
+                'Which company distributed Avatar?',
+                'Who is the mommy of Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "Where did Brad Pitt go to school?",
+                "Who played Frodo Baggins?",
+                "Which movie was based on the book I Heard You Paint Houses (2004)?",
+                #"Where did Brad Pitt go to school?",
                 #'Which company distributed Avatar?',
-                #'Who is the mommy of Leonardo di Caprio?',
+                #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
                 "How many voice actors worked for Frozen?"
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
-                ]
+                "Where did Brad Pitt go to school?",
+                'Which company distributed Avatar?',
+                'Who is Leonardo diCaprio?',
+                "What is James Bond catchphrase?",
+                "In what aspect ratio was Zack Snyder's Justice League shot?"
+                 ]
 
     links = readJson('property_links.json')
     for question in questions:
@@ -58,23 +61,24 @@ def main():
 def ask(question, links, debug=False):
     parse = nlp(question)
     ent = getEnt(parse)
+    print(ent)
     if len(ent) == 1:
         ent = ent[0]
         if parse[0].pos_ == 'AUX':
             return askYesNo(parse=parse,
                             ent=ent,
-                            question=question, 
+                            question=question,
                             links=links)
 
         if "how many" in question.lower() or "count" in question.lower():
             return askCount(parse=parse,
                             ent=ent,
-                            question=question, 
+                            question=question,
                             links=links)
 
         search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent)
+        ent_ids = getEntIds(ent.text)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
@@ -82,15 +86,15 @@ def ask(question, links, debug=False):
         print("entity ids: ", ent_ids)
         properties = getProperties(ent_ids[0])
 
-        for p, v in properties.items():
-            print(p, " : ", v)
+        #for p, v in properties.items():
+        #    print(p, " : ", v)
 
         return findPropCombo(linked_props, properties)
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         print("Search properties: ", search_props)
         for i in range(len(ent)):
-            ent_ids = getEntIds(ent[i])
+            ent_ids = getEntIds(ent[i].text)
             linked_prop = getBestProp(search_props, links)
             print("Linked properties: ", linked_prop)
 
@@ -122,7 +126,7 @@ def askYesNo(parse, ent, question, links):
 
     # for token in parse:
     #     print(f"Lemma: {token.lemma_}")
-    
+
     if len(ent_ids) == 0:
         return "No entities found"
     properties = getProperties(ent_ids[0])
@@ -160,7 +164,7 @@ def findPropCombo(linked_props, properties):
         if best_Linked_prop in properties:
             return properties[best_Linked_prop]
         else:
-            del linked_props[best_Linked_prop]
+            del linked_props[best_Linked_prop_index]
             return findPropCombo(linked_props, properties)
 
 def execQuery(query, url):
@@ -221,7 +225,10 @@ def getEnt(parse):
         for word in parse[1:]:
             if word.text.istitle() or word.text[0].isdigit():
                 entity.append(int(word.i))
-        return [word.text for word in parse[entity[0]:(entity[-1]+1)]]
+        if entity:
+            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        else:
+            return entity
     else:
         for ent in parse.ents:
             entity.append(ent.text)
@@ -242,7 +249,7 @@ def removeStopWords(question, ent):
 
 def removeStopWords2(question, ent):
     for e in ent:
-        question = question.replace(e, '')
+        question = question.replace(e.text, '')
     no_stop_words = [word for word in nlp(question)
                         if (not word.is_stop and word.pos_ != 'PUNCT'
                         and word.text != ' ') or word.i == 0]
