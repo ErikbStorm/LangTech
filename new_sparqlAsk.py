@@ -7,7 +7,16 @@ from Levenshtein import distance as lev
 
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("entity_ruler")
-ruler.from_disk("patterns.jsonl")
+
+# Faster testing:
+ruler.from_disk("patterns.jsonl") #comment this one out
+
+# And uncomment these lines below. Add some patterns you like to test.
+# patterns = [
+#     {"label": "MOVIE", "pattern": "Die Hard"},
+#     {"label": "ACTOR", "pattern": "Leonardo DiCaprio"}
+# ]
+# ruler.add_patterns(patterns)
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
