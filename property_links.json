@@ -72,5 +72,15 @@
     "cause of death": ["how", "die", "death"],
     "place of death": ["where", "die", "death"],
     "test taken": ["Bechdel", "test", "reverse"],
-    "named after" : ["name", "after"]
+    "named after" : ["name", "after"],
+    "voice actor": ["voice", "actor", "dub", "actress", "vocal"],
+    "has edition or translation": ["translation", "translate", "edition", "version"],
+    "after a work by": ["inspired", "work", "after", "by", "inspiration", "inspirational"], 
+    "set in period": ["set", "period",  "era", "time", "setting", "takes", "place", "when"],
+    "narrative location": ["location", "setting", "set", "takes", "place", "where"],
+    "color": ["color", "colour"],
+    "characters": ["character", "appear"],
+    "depicts": ["depict", "depiction", "portray", "subject", "picture", "motif"],
+    "fabrication method": ["fabrication", "make", "process", "production", "produce"],
+    "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"]
 }
