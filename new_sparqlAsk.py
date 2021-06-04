@@ -36,14 +36,14 @@ def main():
                 # "Did Kate Winslet act in 16 movies?",
                 # "Is The Incredibles movie animated?",
                 # "Is Frozen a Christmas film?",
-                "Is Die Hard a Christmas film?",
+                #"Is Die Hard a Christmas film?",
                 # "Did Die Hard pass the Bechdel test?",
                 # "Does Walt Disney Productions own Beauty and the Beast?",
                 #'Which company distributed Avatar?',
                 #'Who is the mommy of Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                
+                "How many voice actors worked for Frozen?"
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
