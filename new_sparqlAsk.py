@@ -98,6 +98,12 @@ def ask(question, links):
     
     #Execute this if there are 2 entities.
     elif len(ent) == 2:
+        if parse[0].pos_ == 'AUX':
+            return askYesNo(parse=parse,
+                            ent=ent,
+                            question=question,
+                            links=links)
+
         search_props = removeStopWords2(question, ent)
         if (DEBUG):
             print("Two entities detected!")
