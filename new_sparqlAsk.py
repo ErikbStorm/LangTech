@@ -284,7 +284,7 @@ def removeStopWords(question, ent):
         Takes in a question in string form and return a list with spacy objects.
     '''
     question = question.replace(ent, '')
-    no_stop_words = [word.text for word in nlp(question)
+    no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                          and word.text != ' ') or word.i == 0]
 
