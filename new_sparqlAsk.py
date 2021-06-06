@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = True
+DEBUG = False
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -159,7 +159,7 @@ def ask(question, links):
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ents23 if x != ent[i]][0]
             answers.append(findPropCombo2(linked_props, ent2, properties))
-        return answers[0]
+        return answers
     else:
         return 'No'
 

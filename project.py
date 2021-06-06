@@ -2,9 +2,9 @@ import csv
 import new_sparqlAsk
 
 def main():
-    #for x, y in new_sparqlAsk.getPropertiesExtended(['Q127367']).items():
-    #    print(x, " : ", y)
-    #evalQuestions('all_questions_with_answers.tsv', write=True)
+    for x, y in new_sparqlAsk.getPropertiesExtended(['Q127367']).items():
+        print(x, " : ", y)
+    evalQuestions('all_questions_with_answers.tsv', write=True)
 
 def ask(question):
     pass
@@ -20,15 +20,15 @@ def evalQuestions(filename, write=False):
                 wiki_id = row[1]
                 corr_answers = [answ.strip() for answ in row[2:]]
 
-            print(question)
-            links = new_sparqlAsk.readJson('property_links.json')
-            sys_answers = new_sparqlAsk.ask(question, links, debug=False)
-            score = evaluate(sys_answers, corr_answers)
-            print(sys_answers, corr_answers)
-            print(score)
-            output.append([i, question, score, sys_answers])
-            if i > 20:
-                break
+                print(question)
+                links = new_sparqlAsk.readJson('property_links.json')
+                sys_answers = new_sparqlAsk.ask(question, links)
+                score = evaluate(sys_answers, corr_answers)
+                print(sys_answers, corr_answers)
+                print(score)
+                output.append([i, question, score, sys_answers])
+                if i > 20:
+                    break
     
     #Writing to a file.
     if write:
