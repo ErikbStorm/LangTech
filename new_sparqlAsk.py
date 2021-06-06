@@ -8,6 +8,8 @@ nlp = spacy.load("en_core_web_lg")
 ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
+# Global debug toggle
+DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -48,10 +50,10 @@ def main():
     links = readJson('property_links.json')
     for question in questions:
         print(question)
-        answer = ask(question, links, debug=True)
+        answer = ask(question, links)
         print(f"Answer: {answer}")
 
-def ask(question, links, debug=False):
+def ask(question, links):
     parse = nlp(question)
     ent = getEnt(parse)
     print(ent)
@@ -70,19 +72,23 @@ def ask(question, links, debug=False):
                             links=links)
 
         search_props = removeStopWords(question, ent)
-        print("Search properties: " , search_props)
+        if (DEBUG):
+            print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
         linked_props = getBestProp(search_props, links)
-        print("Linked properties: " , linked_props)
+        if (DEBUG):
+            print("Linked properties: " , linked_props)
 
         best_ent_id = getBestEntId(ent, ent_ids)
 
-        print("entity ids: ", ent_ids)
+        if (DEBUG):
+            print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
 
-        #for p, v in properties.items():
-        #    print(p, " : ", v)
+        #if (DEBUG):
+        #   for p, v in properties.items():
+        #       print(p, " : ", v)
 
         return findPropCombo(linked_props, properties)
     
@@ -93,9 +99,10 @@ def ask(question, links, debug=False):
         for i in range(len(ent)):
             ent_ids = getEntIds(ent[i])
             linked_props = getBestProp(search_props, links)
-            print("Linked properties: ", linked_props)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
 
-            print("entity ids: ", ent_ids)
+                print("entity ids: ", ent_ids)
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
             properties = getProperties(best_ent_id)
@@ -111,24 +118,39 @@ def ask(question, links, debug=False):
         return 'No'
 
 def askCount(parse, ent, question, links):
+    ''''
+    Processes a question and counts the amount of results
+    '''
     search_props = removeStopWords(question, ent)
-    print("Search properties: " , search_props)
+    if (DEBUG):
+        print("Search properties: " , search_props)
+
     ent_ids = getEntIds(ent)
+    # Return 0 if no entities are found
+    if len(ent_ids) == 0:
+        return 0
 
     linked_props = getBestProp(search_props, links)
-    print("Linked properties: " , linked_props)
+    if (DEBUG):
+        print("Linked properties: " , linked_props)
 
     properties = getProperties(ent_ids[0])
     
+    # Count results
     return len(findPropCombo(linked_props, properties))
 
 def askYesNo(parse, ent, question, links):
+    ''''
+    Processes a question and checks if a property appears in the results
+    '''
     search_props = removeStopWords(question, ent)
-    print("Search properties: " , search_props)
+    if (DEBUG):
+        print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
     linked_prop = getBestProp(search_props, links)
-    print("Linked properties: " , linked_prop)
+    if (DEBUG):
+        print("Linked properties: " , linked_prop)
 
     # for token in parse:
     #     print(f"Lemma: {token.lemma_}")
@@ -161,14 +183,15 @@ def getBestEntId(ent_name, ent_ids):
         from the original entity found.
     '''
     output = []
-    #print(ent_ids)
     i = 0
     for ent_id, found_ent in ent_ids:
         print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
-    print(output)
+
+    if (DEBUG):
+        print(output)
     return sorted(output, key = lambda x: x[2])[0]
 
 def findPropCombo(linked_props, properties):
@@ -182,7 +205,6 @@ def findPropCombo(linked_props, properties):
     else:
         best_Linked_prop_index = max(linked_props.keys())
         best_Linked_prop = linked_props[best_Linked_prop_index]
-        #print(properties[best_Linked_prop])
         if best_Linked_prop in properties:
             return properties[best_Linked_prop]
         else:
@@ -227,7 +249,6 @@ def getEntIds(entity):
 def getIds(json):
     ids = []
     try:
-        #print(json)
         for result in json['search']:
             ids.append((result['id'], result['label']))
         return ids
@@ -265,7 +286,9 @@ def removeStopWords(question, ent):
     no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                          and word != ' ') or word.i == 0]
-    print(no_stop_words)
+
+    if (DEBUG):
+        print(no_stop_words)
 
     return no_stop_words
 
@@ -275,7 +298,9 @@ def removeStopWords2(question, ent):
     no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                      and word != ' ') or word.i == 0]
-    print(no_stop_words)
+
+    if (DEBUG):
+        print(no_stop_words)
 
     return no_stop_words
 
@@ -283,16 +308,16 @@ def removeStopWords2(question, ent):
 def getBestProp(search_props, links):
     same_prop_counts = {}
     for prop, related_props in links.items():
-        #print(prop, related_props)
+
         same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
-        #print(same_props)
+
         same_prop_amount = len(same_props)
         same_prop_counts[same_prop_amount] = prop
 
-    print(same_prop_counts)
+    if (DEBUG):
+        print(same_prop_counts)
     max_key = max(same_prop_counts.keys())
 
-    #return same_prop_counts[max_key]
     return same_prop_counts
 
 
@@ -306,12 +331,47 @@ def getAnswer(search_pred, properties):
 
     return distances[id_with_lowest_distance]
 
-def getProperties(ent_id, extended=False):
+def getProperties(ent_id):
     print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
-    if extended:
-        query = '''
+    query = ''' SELECT ?wdLabel ?ps_Label{
+                VALUES (?company) {(wd:'''+ ent_id[0] +''')}
+                
+                ?company ?p ?statement .
+                ?statement ?ps ?ps_ .
+                
+                ?wd wikibase:claim ?p.
+                ?wd wikibase:statementProperty ?ps.
+                
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+                } ORDER BY ?wd ?statement ?ps_
+                '''
+
+    answer = execQuery(query, url)
+
+    if (DEBUG):
+        print(answer)
+
+    prop, value = answer['head']['vars']
+
+    output = {}
+    for row in answer['results']['bindings']:
+        if row[prop]['value'] in output:
+            output[row[prop]['value']].append(row[value]['value'])
+        else:
+            output[row[prop]['value']] = [row[value]['value']]
+
+    return output
+
+
+def getPropertiesExtended(ent_id):
+    '''
+        Extended version on getProperties.
+    '''
+    url = 'https://query.wikidata.org/sparql'
+    query = '''
                     SELECT ?wdLabel ?ps_Label ?wdpqLabel ?pq_Label {
                     VALUES (?company) {(wd:'''+ ent_id[0] +''')}
 
@@ -327,28 +387,15 @@ def getProperties(ent_id, extended=False):
                     }
 
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                    } ORDER BY ?wd ?statement ?ps_
-                    '''
-    else:
-        query = ''' SELECT ?wdLabel ?ps_Label{
-                    VALUES (?company) {(wd:'''+ ent_id[0] +''')}
-                    
-                    ?company ?p ?statement .
-                    ?statement ?ps ?ps_ .
-                    
-                    ?wd wikibase:claim ?p.
-                    ?wd wikibase:statementProperty ?ps.
-                    
-                    
-                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                    } ORDER BY ?wd ?statement ?ps_
+                    } 
+                    ORDER BY ?wd ?statement ?ps_
                     '''
 
     answer = execQuery(query, url)
 
-    print(answer)
+    prop, value, prop_of_value, value_of_prop_of_value = answer['head']['vars']
 
-    prop, value = answer['head']['vars']
+    #print(answer['results']['bindings'])
 
     output = {}
     for row in answer['results']['bindings']:
@@ -356,7 +403,13 @@ def getProperties(ent_id, extended=False):
             output[row[prop]['value']].append(row[value]['value'])
         else:
             output[row[prop]['value']] = [row[value]['value']]
-    
+
+        if prop_of_value in row:
+            if row[prop_of_value]['value'] in output:
+                output[row[prop_of_value]['value']].append((row[value]['value'], row[value_of_prop_of_value]['value']))
+            else:
+                output[row[prop_of_value]['value']] = [(row[value]['value'], row[value_of_prop_of_value]['value'])]
+
     #print(output)
 
     return output
