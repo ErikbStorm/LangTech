@@ -68,7 +68,7 @@ def ask(question, links):
                             question=question,
                             links=links)
 
-        if "how many" in question.lower() or "count" in question.lower().split():
+        if "how many" in question.lower() or "count" in question.lower().split() or "number" in question.lower().split():
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
@@ -130,7 +130,7 @@ def ask(question, links):
 
         #If there are still no answers...
 
-        if 'No' in answers:
+        if 'No' in answers or len(answers) == 0:
             answers = []
             for i in range(len(ent)):
                 if (DEBUG):
@@ -223,7 +223,7 @@ def askCount(parse, ent, question, links):
     ent_ids = getEntIds(ent)
     # Return 0 if no entities are found
     if len(ent_ids) == 0:
-        return [0]
+        return ["0"]
 
     linked_props = getBestProp(search_props, links)
     if (DEBUG):
@@ -231,8 +231,16 @@ def askCount(parse, ent, question, links):
 
     properties = getProperties(ent_ids[0])
 
+    search_list = [term.text for term in search_props]
+
+    if "number" in search_list:
+        for key, prop in linked_props:
+            for term in search_list:
+                if term in prop and term != "number":
+                    return [str(findPropCombo([(0,prop)], properties))]
+
     # Count results
-    return [len(findPropCombo(linked_props, properties))]
+    return [str(len(findPropCombo(linked_props, properties)))]
 
 def askYesNo(parse, ent, question, links):
     ''''
@@ -255,10 +263,8 @@ def askYesNo(parse, ent, question, links):
     if (DEBUG):
         print("Prop combo: " , prop_combo)
 
-
-
     if parse[0].text == 'Is':
-        for prop in linked_props:
+        for key, prop in linked_props:
             if prop in properties:
                 search_list = [term.lemma_ for term in search_props]
                 if any(term in search_list for term in properties[prop]):
@@ -267,7 +273,7 @@ def askYesNo(parse, ent, question, links):
         # for token in parse:
         #     if token.pos_ == "ADJ":
         #         return "Yes"
-    elif len(linked_props) > 1:
+    elif len(linked_props) > 0:
             return ["Yes"]
             
     return ["No"]
