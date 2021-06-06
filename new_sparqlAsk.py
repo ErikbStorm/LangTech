@@ -20,7 +20,7 @@ def main():
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
-                # "Is Brad Pitt female?",
+                "Is Brad Pitt female?",
                 "Did Frozen win an award?",
                 # "Did Frozen win any awards?",
                 # 'Which company distributed Avatar?',
@@ -89,9 +89,6 @@ def ask(question, links):
             print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
 
-        #if (DEBUG):
-        #   for p, v in properties.items():
-        #       print(p, " : ", v)
 
         answer = findPropCombo(linked_props.copy(), properties)
         if answer == ['No']:
@@ -99,9 +96,11 @@ def ask(question, links):
             answer = findPropCombo(linked_props, properties)
         return answer
     
+    #Execute this if there are 2 entities.
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         if (DEBUG):
+            print("Two entities detected!")
             print("Search properties: ", search_props)
         answers = []
         for i in range(len(ent)):
@@ -116,8 +115,13 @@ def ask(question, links):
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ent if x != ent[i]][0]
             answers.append(findPropCombo2(linked_props, ent2, properties))
+        print("Answers: ", answers)
         return answers[0]
+    
+    #Execute this if there are 3 entities.
     elif len(ent) == 3:
+        if (DEBUG):
+            print("Three entities detected!")
         search_props = removeStopWords2(question, ent)
         answers = []
         ents21 = ent[0] + ' ' + ent[1]
@@ -161,7 +165,7 @@ def ask(question, links):
             answers.append(findPropCombo2(linked_props, ent2, properties))
         return answers
     else:
-        return 'No'
+        return ['No']
 
 def askCount(parse, ent, question, links):
     ''''
@@ -174,7 +178,7 @@ def askCount(parse, ent, question, links):
     ent_ids = getEntIds(ent)
     # Return 0 if no entities are found
     if len(ent_ids) == 0:
-        return 0
+        return [0]
 
     linked_props = getBestProp(search_props, links)
     if (DEBUG):
@@ -183,7 +187,7 @@ def askCount(parse, ent, question, links):
     properties = getProperties(ent_ids[0])
 
     # Count results
-    return len(findPropCombo(linked_props, properties))
+    return [len(findPropCombo(linked_props, properties))]
 
 def askYesNo(parse, ent, question, links):
     ''''
@@ -194,35 +198,31 @@ def askYesNo(parse, ent, question, links):
         print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
-
-    # for token in parse:
-    #     print(f"Lemma: {token.lemma_}")
+    linked_props = getBestProp(search_props, links)
+    if (DEBUG):
+        print("Linked properties: " , linked_prop)
 
     if len(ent_ids) == 0:
         return "No entities found"
     properties = getProperties(ent_ids[0])
 
-    linked_prop = getBestProp(search_props, links)
+    prop_combo = findPropCombo(linked_props, properties)
     if (DEBUG):
-        print("Linked properties: " , linked_prop)
+        print("Prop combo: " , prop_combo)
 
-    #for p, v in properties.items():
-    #        print(p, " : ", v)
-    
-    if (DEBUG):
-        print(f"Linkded prop: {properties[linked_prop]}")
 
     if parse[0].text == 'Is':
-        for prop in search_props:
-            if properties[linked_prop][0] == prop.text:
-                return "Yes"
-            if prop in properties[linked_prop][0]:
-                return "Yes"
-        for token in parse:
-            if token.pos_ == "ADJ":
-                return "Yes"
+        for prop in linked_props.values():
+            if prop in properties:
+                search_list = [term.lemma_ for term in search_props]
+                if any(term in search_list for term in properties[prop]):
+                    return "Yes"
+                
+        # for token in parse:
+        #     if token.pos_ == "ADJ":
+        #         return "Yes"
     else:
-        if properties[linked_prop][0]:
+        if len(linked_props) > 1:
             return "Yes"
     return "No"
 
@@ -253,25 +253,24 @@ def findPropCombo(linked_props, properties):
     if len(linked_props) == 0:
         return ['No']
     else:
-        best_Linked_prop_index = max(linked_props.keys())
-        best_Linked_prop = linked_props[best_Linked_prop_index]
+        best_Linked_prop = linked_props[0][1]
+        #print(best_Linked_prop)
         if best_Linked_prop in properties:
             return properties[best_Linked_prop]
         else:
-            del linked_props[best_Linked_prop_index]
+            del linked_props[0]
             return findPropCombo(linked_props, properties)
 
 def findPropCombo2(linked_props, entity2, properties):
     '''
         Checks what the best property for the linked properties is.
-        Will return the final answer.
+        Will return the final answer. Used when having more entities.
     '''
     #Checks if there are no linked props left
     if len(linked_props) == 0:
-        return []
+        return ['No']
     else:
-        best_Linked_prop_index = max(linked_props.keys())
-        best_Linked_prop = linked_props[best_Linked_prop_index]
+        best_Linked_prop = linked_props[0][1]
         if best_Linked_prop in properties:
             for tuple in properties[best_Linked_prop]:
                 if tuple[1] == entity2:
@@ -279,7 +278,7 @@ def findPropCombo2(linked_props, entity2, properties):
                 elif tuple[0] == entity2:
                     return tuple[1]
         else:
-            del linked_props[best_Linked_prop_index]
+            del linked_props[0]
             return findPropCombo2(linked_props, entity2, properties)
 
 
@@ -369,7 +368,7 @@ def removeStopWords(question, ent):
 def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
-    no_stop_words = [word.text for word in nlp(question)
+    no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                      and word.text != ' ') or word.i == 0]
 
@@ -380,19 +379,21 @@ def removeStopWords2(question, ent):
 
 
 def getBestProp(search_props, links):
-    same_prop_counts = {}
+    same_prop_counts = []
     for prop, related_props in links.items():
 
         same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
 
         same_prop_amount = len(same_props)
-        same_prop_counts[same_prop_amount] = prop
 
-    if (DEBUG):
-        print(same_prop_counts)
-    max_key = max(same_prop_counts.keys())
+        same_prop_counts.append((same_prop_amount, prop))
 
-    return same_prop_counts
+    #print(same_prop_counts)
+    #max_key = max(same_prop_counts.keys())
+
+    sorted_counts = sorted(same_prop_counts, key = lambda x: x[0], reverse=True)
+
+    return [(c,prop) for c, prop in sorted_counts if c is not 0][:4]
 
 
 def getAnswer(search_pred, properties):

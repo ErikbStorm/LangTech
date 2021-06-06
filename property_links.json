@@ -77,10 +77,12 @@
     "has edition or translation": ["translation", "translate", "edition", "version"],
     "after a work by": ["inspired", "work", "after", "by", "inspiration", "inspirational"], 
     "set in period": ["set", "period",  "era", "time", "setting", "takes", "place", "when"],
-    "narrative location": ["location", "setting", "set", "takes", "place", "where"],
+    "narrative location": ["location", "setting", "set", "takes", "place", "where", "country"],
     "color": ["color", "colour"],
     "characters": ["character", "appear"],
     "depicts": ["depict", "depiction", "portray", "subject", "picture", "motif"],
     "fabrication method": ["fabrication", "make", "process", "production", "produce"],
-    "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"]
+    "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"],
+    "based on" : ["base", "on", "inspire", "by"],
+    "inspired by" : ["inspire", "by"]
 }
