@@ -26,7 +26,7 @@ def evalQuestions(filename, write=False):
             score = evaluate(sys_answers, corr_answers)
             print(sys_answers, corr_answers)
             print(score)
-            output.append([question, score, sys_answers])
+            output.append([i, question, score, sys_answers])
             if i > 20:
                 break
     

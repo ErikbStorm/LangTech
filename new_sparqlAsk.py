@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = True
+DEBUG = False
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -34,7 +34,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked for Frozen?",
+                #"How many voice actors worked for Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -43,8 +43,9 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
-                "How long is Frozen?",
-                "How long is Brad Pitt?"
+                #"How long is Frozen?",
+                #"How long is Brad Pitt?",
+                "Where was The Avengers filmed?"
                  ]
 
     links = readJson('property_links.json')
@@ -56,7 +57,8 @@ def main():
 def ask(question, links):
     parse = nlp(question)
     ent = getEnt(parse)
-    print(ent)
+    if (DEBUG):
+        print(ent)
     if len(ent) == 1:
         ent = ent[0]
         if parse[0].pos_ == 'AUX':
@@ -81,6 +83,7 @@ def ask(question, links):
             print("Linked properties: " , linked_props)
 
         best_ent_id = getBestEntId(ent, ent_ids)
+        ent_ids.remove(best_ent_id[:2])
 
         if (DEBUG):
             print("entity ids: ", ent_ids)
@@ -90,11 +93,16 @@ def ask(question, links):
         #   for p, v in properties.items():
         #       print(p, " : ", v)
 
-        return findPropCombo(linked_props, properties)
+        answer = findPropCombo(linked_props.copy(), properties)
+        if answer == ['No']:
+            properties = getProperties(ent_ids[0])
+            answer = findPropCombo(linked_props, properties)
+        return answer
     
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
-        # print("Search properties: ", search_props)
+        if (DEBUG):
+            print("Search properties: ", search_props)
         answers = []
         for i in range(len(ent)):
             ent_ids = getEntIds(ent[i])
@@ -160,8 +168,8 @@ def askYesNo(parse, ent, question, links):
     
     #for p, v in properties.items():
     #        print(p, " : ", v)
-    
-    print(f"Linkded prop: {properties[linked_prop]}")
+    if (DEBUG):
+        print(f"Linkded prop: {properties[linked_prop]}")
     if parse[0] == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop:
@@ -184,7 +192,8 @@ def getBestEntId(ent_name, ent_ids):
     output = []
     i = 0
     for ent_id, found_ent in ent_ids:
-        print(found_ent, ent_name)
+        if (DEBUG):
+            print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -200,7 +209,7 @@ def findPropCombo(linked_props, properties):
     '''
     #Checks if there are no linked props left
     if len(linked_props) == 0:
-        return []
+        return ['No']
     else:
         best_Linked_prop_index = max(linked_props.keys())
         best_Linked_prop = linked_props[best_Linked_prop_index]
@@ -306,7 +315,7 @@ def removeStopWords(question, ent):
         Takes in a question in string form and return a list with spacy objects.
     '''
     question = question.replace(ent, '')
-    no_stop_words = [word.text for word in nlp(question)
+    no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                          and word.text != ' ') or word.i == 0]
 
@@ -355,7 +364,8 @@ def getAnswer(search_pred, properties):
     return distances[id_with_lowest_distance]
 
 def getProperties(ent_id):
-    print(ent_id)
+    if (DEBUG):
+        print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
     query = ''' SELECT ?wdLabel ?ps_Label{
