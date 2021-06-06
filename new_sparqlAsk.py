@@ -4,9 +4,9 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_trf")
-ruler = nlp.add_pipe("entity_ruler")
-ruler.from_disk("patterns.jsonl")
+nlp = spacy.load("en_core_web_sm")
+#ruler = nlp.add_pipe("entity_ruler")
+#ruler.from_disk("patterns.jsonl")
 
 
 def main():
@@ -69,14 +69,14 @@ def ask(question, links, debug=False):
                             question=question,
                             links=links)
 
-        search_props = removeStopWords(question, ent.text)
+        search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent.text)
+        ent_ids = getEntIds(ent)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
 
-        best_ent_id = getBestEntId(ent.text, ent_ids)
+        best_ent_id = getBestEntId(ent, ent_ids)
 
         print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
@@ -334,8 +334,10 @@ def getProperties(ent_id):
     return output
 
 
-
 def getPropertiesExtended(ent_id):
+    '''
+        Extended version on getProperties.
+    '''
     url = 'https://query.wikidata.org/sparql'
     query = '''
                     SELECT ?wdLabel ?ps_Label ?wdpqLabel ?pq_Label {
@@ -353,12 +355,15 @@ def getPropertiesExtended(ent_id):
                     }
 
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                    } ORDER BY ?wd ?statement ?ps_
+                    } 
+                    ORDER BY ?wd ?statement ?ps_
                     '''
 
     answer = execQuery(query, url)
 
     prop, value, prop_of_value, value_of_prop_of_value = answer['head']['vars']
+
+    #print(answer['results']['bindings'])
 
     output = {}
     for row in answer['results']['bindings']:
@@ -366,7 +371,13 @@ def getPropertiesExtended(ent_id):
             output[row[prop]['value']].append(row[value]['value'])
         else:
             output[row[prop]['value']] = [row[value]['value']]
-    
+
+        if prop_of_value in row:
+            if row[prop_of_value]['value'] in output:
+                output[row[prop_of_value]['value']].append((row[value]['value'], row[value_of_prop_of_value]['value']))
+            else:
+                output[row[prop_of_value]['value']] = [(row[value]['value'], row[value_of_prop_of_value]['value'])]
+
     #print(output)
 
     return output
