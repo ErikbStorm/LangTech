@@ -156,6 +156,7 @@ def getBestEntId(ent_name, ent_ids):
     #print(ent_ids)
     i = 0
     for ent_id, found_ent in ent_ids:
+        print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -209,12 +210,11 @@ def getEntIds(entity):
           'type' : 'item',
           'format':'json'}
     
-    params['search'] = entity
+    params['search'] = entity.text
     json = requests.get(url,params).json()
     
     p_ids = getIds(json)
     return p_ids[:5]
-
 def getIds(json):
     ids = []
     try:
@@ -253,7 +253,7 @@ def removeStopWords(question, ent):
     '''
         Takes in a question in string form and return a list with spacy objects.
     '''
-    question = question.replace(ent, '')
+    question = question.replace(ent.text, '')
     no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
                          and word.text != ' ') or word.i == 0]
