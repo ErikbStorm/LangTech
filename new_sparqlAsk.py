@@ -206,11 +206,6 @@ def askYesNo(parse, ent, question, links):
         return "No entities found"
     properties = getProperties(ent_ids[0])
 
-    prop_combo = findPropCombo(linked_props, properties)
-    if (DEBUG):
-        print("Prop combo: " , prop_combo)
-
-
     if parse[0].text == 'Is':
         for prop in linked_props.values():
             if prop in properties:
