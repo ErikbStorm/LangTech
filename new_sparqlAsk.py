@@ -128,7 +128,7 @@ def ask(question, links):
 
         #If there are still no answers...
 
-        if 'No' in answers:
+        if 'No' in answers or len(answers) == 0:
             answers = []
             for i in range(len(ent)):
                 if (DEBUG):

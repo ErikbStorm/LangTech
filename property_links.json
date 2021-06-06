@@ -33,7 +33,7 @@
     "place of birth": ["place", "where", "birth", "born"],
     "creator": ["creator", "create", "artist", "made"],
     "ethnic group": ["ethnic", "group", "ethnicity", "race", "racial"],
-    "spouse": ["spouse", "marry", "wife", "husband"],
+    "spouse": ["spouse", "marry", "wife", "husband", "to"],
     "owner of": ["own", "owner"],
     "child": ["child", "son", "daughter", "kid"],
     "author": ["author", "write", "writer"],
@@ -46,7 +46,7 @@
     "title": ["title", "headline", "full", "know", "original"],
     "cost": ["budget", "cost", "money"],
     "editor": ["editor", "edit"],
-    "box office": ["bring", "in", "box", "office", "profit", "make", "money"],
+    "box office": ["bring", "box", "office", "profit", "make", "money"],
     "main subject": ["subject", "topic", "about", "main", "issue", "theme","regard", "term", "describe", "mention"],
     "cast member": ["cast", "member", "play", "in", "actor", "actrice", "act"],
     "film editor": ["editor", "edit"],
@@ -85,5 +85,6 @@
     "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"],
     "based on" : ["base", "on", "inspire", "by"],
     "inspired by" : ["inspire", "by"],
-    "followed by" : ["follow", "by", "sequel", "next", "up"]
+    "followed by" : ["follow", "by", "sequel", "next", "up"],
+    "IMDb ID" : ["imbd", "id"]
 }
