@@ -84,5 +84,6 @@
     "fabrication method": ["fabrication", "make", "process", "production", "produce"],
     "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"],
     "based on" : ["base", "on", "inspire", "by"],
-    "inspired by" : ["inspire", "by"]
+    "inspired by" : ["inspire", "by"],
+    "followed by" : ["follow", "by", "sequel", "next", "up"]
 }
