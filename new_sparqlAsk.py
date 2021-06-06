@@ -4,9 +4,9 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_lg")
-ruler = nlp.add_pipe("entity_ruler")
-ruler.from_disk("patterns.jsonl")
+nlp = spacy.load("en_core_web_sm")
+#ruler = nlp.add_pipe("entity_ruler")
+#ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
 DEBUG = True
@@ -34,7 +34,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked for Frozen?",
+                #"How many voice actors worked for Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -43,8 +43,9 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
-                "How long is Frozen?",
-                "How long is Brad Pitt?"
+                #"How long is Frozen?",
+                #"How long is Brad Pitt?",
+                "Where was The Avengers filmed?"
                  ]
 
     links = readJson('property_links.json')
@@ -81,6 +82,7 @@ def ask(question, links):
             print("Linked properties: " , linked_props)
 
         best_ent_id = getBestEntId(ent, ent_ids)
+        ent_ids.remove(best_ent_id[:2])
 
         if (DEBUG):
             print("entity ids: ", ent_ids)
@@ -90,7 +92,11 @@ def ask(question, links):
         #   for p, v in properties.items():
         #       print(p, " : ", v)
 
-        return findPropCombo(linked_props, properties)
+        answer = findPropCombo(linked_props.copy(), properties)
+        if answer == ['No']:
+            properties = getProperties(ent_ids[0])
+            answer = findPropCombo(linked_props, properties)
+        return answer
     
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
@@ -113,7 +119,7 @@ def ask(question, links):
             return answers[1]
     elif len(ent) == 3:
         search_props = removeStopWords2(question, ent)
-
+        
 
     else:
         return 'No'
@@ -163,7 +169,7 @@ def askYesNo(parse, ent, question, links):
     #for p, v in properties.items():
     #        print(p, " : ", v)
     
-    print(f"Linkded prop: {properties[linked_prop]}")
+    print(f"Linked prop: {properties[linked_prop]}")
     if parse[0] == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop:
@@ -202,7 +208,7 @@ def findPropCombo(linked_props, properties):
     '''
     #Checks if there are no linked props left
     if len(linked_props) == 0:
-        return []
+        return ['No']
     else:
         best_Linked_prop_index = max(linked_props.keys())
         best_Linked_prop = linked_props[best_Linked_prop_index]
