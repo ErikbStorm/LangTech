@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = True
+DEBUG = False
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -56,7 +56,8 @@ def main():
 def ask(question, links):
     parse = nlp(question)
     ent = getEnt(parse)
-    print(ent)
+    if (DEBUG):
+        print(ent)
     if len(ent) == 1:
         ent = ent[0]
         if parse[0].pos_ == 'AUX':
@@ -94,7 +95,8 @@ def ask(question, links):
     
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
-        print("Search properties: ", search_props)
+        if (DEBUG):
+            print("Search properties: ", search_props)
         answers = []
         for i in range(len(ent)):
             ent_ids = getEntIds(ent[i])
@@ -162,8 +164,8 @@ def askYesNo(parse, ent, question, links):
     
     #for p, v in properties.items():
     #        print(p, " : ", v)
-    
-    print(f"Linkded prop: {properties[linked_prop]}")
+    if (DEBUG):
+        print(f"Linkded prop: {properties[linked_prop]}")
     if parse[0] == 'Is':
         for prop in search_props:
             if properties[linked_prop][0] == prop:
@@ -186,7 +188,8 @@ def getBestEntId(ent_name, ent_ids):
     output = []
     i = 0
     for ent_id, found_ent in ent_ids:
-        print(found_ent, ent_name)
+        if (DEBUG):
+            print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -333,7 +336,8 @@ def getAnswer(search_pred, properties):
     return distances[id_with_lowest_distance]
 
 def getProperties(ent_id):
-    print(ent_id)
+    if (DEBUG):
+        print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
     query = ''' SELECT ?wdLabel ?ps_Label{
