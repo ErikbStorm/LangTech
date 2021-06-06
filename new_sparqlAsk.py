@@ -4,7 +4,7 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_lg")
+nlp = spacy.load("en_core_web_trf")
 ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
@@ -233,14 +233,13 @@ def readJson(filename):
 def getEnt(parse):
     entity = list()
     if not parse.ents:
-        return 'FUUUUUCK'
-        # for word in parse[1:]:
-        #     if word.text.istitle() or word.text[0].isdigit():
-        #         entity.append(int(word.i))
-        # if entity:
-        #     return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
-        # else:
-        #     return entity
+        for word in parse[1:]:
+            if word.text.istitle() or word.text[0].isdigit():
+                entity.append(int(word.i))
+        if entity:
+            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        else:
+            return entity
     else:
         for ent in parse.ents:
             entity.append(ent)
@@ -263,8 +262,8 @@ def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
     no_stop_words = [word for word in nlp(question)
-                        if (word.pos_ != 'PUNCT' # and not word.is_stop
-                        and word.text != ' ') or word.i == 0]
+                     if (word.pos_ != 'PUNCT' # and not word.is_stop
+                     and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
@@ -285,7 +284,7 @@ def getBestProp(search_props, links):
     #return same_prop_counts[max_key]
     return same_prop_counts
 
-
+@rol
 def getAnswer(search_pred, properties):
     distances = {}
     for property, values in properties.items():
