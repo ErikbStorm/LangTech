@@ -67,7 +67,7 @@ def ask(question, links):
                             question=question,
                             links=links)
 
-        if "how many" in question.lower() or "count" in question.lower():
+        if "how many" in question.lower() or "count" in question.lower().split():
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
@@ -75,6 +75,7 @@ def ask(question, links):
 
         search_props = removeStopWords(question, ent)
         if (DEBUG):
+            print("Only one entity detected!")
             print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
@@ -114,9 +115,43 @@ def ask(question, links):
 
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ent if x != ent[i]][0]
-            answers.append(findPropCombo2(linked_props, ent2, properties))
+            answer = findPropCombo2(linked_props, ent2, properties)
+            if answer is not None:
+                answers += answer
         print("Answers: ", answers)
-        return answers[0]
+
+        #If there are still no answers...
+
+        if 'No' in answers:
+            answers = []
+            for i in range(len(ent)):
+                if (DEBUG):
+                    print("Only one entity detected!")
+                    print("Search properties: " , search_props)
+                ent_ids = getEntIds(ent[i])
+
+                linked_props = getBestProp(search_props, links)
+                if (DEBUG):
+                    print("Linked properties: " , linked_props)
+
+                best_ent_id = getBestEntId(ent[i], ent_ids)
+                ent_ids.remove(best_ent_id[:2])
+
+                if (DEBUG):
+                    print("entity ids: ", ent_ids)
+                properties = getProperties(best_ent_id)
+
+
+                answer = findPropCombo(linked_props.copy(), properties)
+                if answer == ['No']:
+                    properties = getProperties(ent_ids[0])
+                    answer = findPropCombo(linked_props, properties)
+                
+                #only add answer if it is meaningful.
+                if answer != ['No']:
+                    answers += answer
+
+        return answers
     
     #Execute this if there are 3 entities.
     elif len(ent) == 3:
@@ -200,7 +235,7 @@ def askYesNo(parse, ent, question, links):
 
     linked_props = getBestProp(search_props, links)
     if (DEBUG):
-        print("Linked properties: " , linked_prop)
+        print("Linked properties: " , linked_props)
 
     if len(ent_ids) == 0:
         return "No entities found"
@@ -216,15 +251,15 @@ def askYesNo(parse, ent, question, links):
             if prop in properties:
                 search_list = [term.lemma_ for term in search_props]
                 if any(term in search_list for term in properties[prop]):
-                    return "Yes"
+                    return ["Yes"]
                 
         # for token in parse:
         #     if token.pos_ == "ADJ":
         #         return "Yes"
     else:
         if len(linked_props) > 1:
-            return "Yes"
-    return "No"
+            return ["Yes"]
+    return ["No"]
 
 def getBestEntId(ent_name, ent_ids):
     '''
@@ -256,6 +291,7 @@ def findPropCombo(linked_props, properties):
         best_Linked_prop = linked_props[0][1]
         #print(best_Linked_prop)
         if best_Linked_prop in properties:
+            #print("Antwoord ", properties[best_Linked_prop])
             return properties[best_Linked_prop]
         else:
             del linked_props[0]

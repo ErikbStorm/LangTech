@@ -22,6 +22,7 @@ def evalQuestions(filename, write=False):
 
                 print(question)
                 sys_answers = new_sparqlAsk.ask(question, links)
+                #print("Systeem antwoord: ", sys_answers)
                 print(sys_answers, corr_answers)
                 score = evaluate(sys_answers, corr_answers)
                 print(score)
