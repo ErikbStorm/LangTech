@@ -2,7 +2,8 @@ import csv
 import new_sparqlAsk
 
 def main():
-    evalQuestions('all_questions_with_answers.tsv', write=True)
+    print(new_sparqlAsk.getProperties('Q127367', extended=True))
+    #evalQuestions('all_questions_with_answers.tsv', write=True)
 
 def ask(question):
     pass
