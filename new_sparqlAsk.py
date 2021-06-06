@@ -94,7 +94,7 @@ def ask(question, links):
     
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
-        print("Search properties: ", search_props)
+        # print("Search properties: ", search_props)
         answers = []
         for i in range(len(ent)):
             ent_ids = getEntIds(ent[i])
@@ -106,11 +106,9 @@ def ask(question, links):
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
-            answers.append(findPropCombo(linked_props, properties))
-        if len(answers) == 1:
-            return answers[0]
-        else:
-            return answers[1]
+            ent2 = [ent for x in ent if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        return answers[0]
     elif len(ent) == 3:
         search_props = removeStopWords2(question, ent)
 
@@ -212,6 +210,28 @@ def findPropCombo(linked_props, properties):
             del linked_props[best_Linked_prop_index]
             return findPropCombo(linked_props, properties)
 
+def findPropCombo2(linked_props, entity2, properties):
+    '''
+        Checks what the best property for the linked properties is.
+        Will return the final answer.
+    '''
+    #Checks if there are no linked props left
+    if len(linked_props) == 0:
+        return []
+    else:
+        best_Linked_prop_index = max(linked_props.keys())
+        best_Linked_prop = linked_props[best_Linked_prop_index]
+        if best_Linked_prop in properties:
+            for tuple in properties[best_Linked_prop]:
+                if tuple[1] == entity2:
+                    return tuple[0]
+                elif tuple[0] == entity2:
+                    return tuple[1]
+        else:
+            del linked_props[best_Linked_prop_index]
+            return findPropCombo2(linked_props, entity2, properties)
+
+
 def execQuery(query, url):
     '''
         Executes a query given the url and query.
@@ -275,6 +295,8 @@ def getEnt(parse):
             return entity
     else:
         for ent in parse.ents:
+            if ent.text == 'first':
+                continue
             entity.append(ent.text)
     return entity
 
