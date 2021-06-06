@@ -42,7 +42,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked for Frozen?"
+                "How many voice actors worked for Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -51,6 +51,8 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
+                "How long is Frozen?",
+                "How long is Brad Pitt?"
                  ]
 
     links = readJson('property_links.json')
