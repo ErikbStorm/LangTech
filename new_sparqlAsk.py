@@ -34,7 +34,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked for Frozen?",
+                #"How many voice actors worked for Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -43,8 +43,9 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
-                "How long is Frozen?",
-                "How long is Brad Pitt?"
+                #"How long is Frozen?",
+                #"How long is Brad Pitt?",
+                "Where was The Avengers filmed?"
                  ]
 
     links = readJson('property_links.json')
@@ -82,6 +83,7 @@ def ask(question, links):
             print("Linked properties: " , linked_props)
 
         best_ent_id = getBestEntId(ent, ent_ids)
+        ent_ids.remove(best_ent_id[:2])
 
         if (DEBUG):
             print("entity ids: ", ent_ids)
@@ -91,8 +93,12 @@ def ask(question, links):
         #   for p, v in properties.items():
         #       print(p, " : ", v)
 
-        return findPropCombo(linked_props, properties)
-
+        answer = findPropCombo(linked_props.copy(), properties)
+        if answer == ['No']:
+            properties = getProperties(ent_ids[0])
+            answer = findPropCombo(linked_props, properties)
+        return answer
+    
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         if (DEBUG):
@@ -108,15 +114,52 @@ def ask(question, links):
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
-            answers.append(findPropCombo(linked_props, properties))
-        if len(answers) == 1:
-            return answers[0]
-        else:
-            return answers[1]
+            ent2 = [x for x in ent if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        return answers[0]
     elif len(ent) == 3:
         search_props = removeStopWords2(question, ent)
+        answers = []
+        ents21 = ent[0] + ' ' + ent[1]
+        ents22 = ent[1] + ' ' + ent[2]
+        ents23 = ent[0] + ' ' + ent[2]
+        for i in range(len(ents21)):
+            ent_ids = getEntIds(ents21[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
 
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents21[i], ent_ids)
 
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents21 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        for i in range(len(ents22)):
+            ent_ids = getEntIds(ents22[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
+
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents22[i], ent_ids)
+
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents22 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        for i in range(len(ents23)):
+            ent_ids = getEntIds(ents23[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
+
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents22[i], ent_ids)
+
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents23 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        return answers[0]
     else:
         return 'No'
 
@@ -208,7 +251,7 @@ def findPropCombo(linked_props, properties):
     '''
     #Checks if there are no linked props left
     if len(linked_props) == 0:
-        return []
+        return ['No']
     else:
         best_Linked_prop_index = max(linked_props.keys())
         best_Linked_prop = linked_props[best_Linked_prop_index]
@@ -217,6 +260,28 @@ def findPropCombo(linked_props, properties):
         else:
             del linked_props[best_Linked_prop_index]
             return findPropCombo(linked_props, properties)
+
+def findPropCombo2(linked_props, entity2, properties):
+    '''
+        Checks what the best property for the linked properties is.
+        Will return the final answer.
+    '''
+    #Checks if there are no linked props left
+    if len(linked_props) == 0:
+        return []
+    else:
+        best_Linked_prop_index = max(linked_props.keys())
+        best_Linked_prop = linked_props[best_Linked_prop_index]
+        if best_Linked_prop in properties:
+            for tuple in properties[best_Linked_prop]:
+                if tuple[1] == entity2:
+                    return tuple[0]
+                elif tuple[0] == entity2:
+                    return tuple[1]
+        else:
+            del linked_props[best_Linked_prop_index]
+            return findPropCombo2(linked_props, entity2, properties)
+
 
 def execQuery(query, url):
     '''
@@ -281,6 +346,8 @@ def getEnt(parse):
             return entity
     else:
         for ent in parse.ents:
+            if ent.text == 'first':
+                continue
             entity.append(ent.text)
     return entity
 
