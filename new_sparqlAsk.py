@@ -222,9 +222,9 @@ def askYesNo(parse, ent, question, links):
         # for token in parse:
         #     if token.pos_ == "ADJ":
         #         return "Yes"
-    else:
-        if len(linked_props) > 1:
+    elif len(linked_props) > 1:
             return "Yes"
+            
     return "No"
 
 
