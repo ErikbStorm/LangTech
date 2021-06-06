@@ -296,12 +296,46 @@ def getAnswer(search_pred, properties):
 
     return distances[id_with_lowest_distance]
 
-def getProperties(ent_id, extended=False):
+def getProperties(ent_id):
     print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
-    if extended:
-        query = '''
+    query = ''' SELECT ?wdLabel ?ps_Label{
+                VALUES (?company) {(wd:'''+ ent_id[0] +''')}
+                
+                ?company ?p ?statement .
+                ?statement ?ps ?ps_ .
+                
+                ?wd wikibase:claim ?p.
+                ?wd wikibase:statementProperty ?ps.
+                
+                
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+                } ORDER BY ?wd ?statement ?ps_
+                '''
+
+    answer = execQuery(query, url)
+
+    print(answer)
+
+    prop, value = answer['head']['vars']
+
+    output = {}
+    for row in answer['results']['bindings']:
+        if row[prop]['value'] in output:
+            output[row[prop]['value']].append(row[value]['value'])
+        else:
+            output[row[prop]['value']] = [row[value]['value']]
+    
+    #print(output)
+
+    return output
+
+
+
+def getPropertiesExtended(ent_id):
+    url = 'https://query.wikidata.org/sparql'
+    query = '''
                     SELECT ?wdLabel ?ps_Label ?wdpqLabel ?pq_Label {
                     VALUES (?company) {(wd:'''+ ent_id[0] +''')}
 
@@ -319,26 +353,10 @@ def getProperties(ent_id, extended=False):
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
                     } ORDER BY ?wd ?statement ?ps_
                     '''
-    else:
-        query = ''' SELECT ?wdLabel ?ps_Label{
-                    VALUES (?company) {(wd:'''+ ent_id[0] +''')}
-                    
-                    ?company ?p ?statement .
-                    ?statement ?ps ?ps_ .
-                    
-                    ?wd wikibase:claim ?p.
-                    ?wd wikibase:statementProperty ?ps.
-                    
-                    
-                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                    } ORDER BY ?wd ?statement ?ps_
-                    '''
 
     answer = execQuery(query, url)
 
-    print(answer)
-
-    prop, value = answer['head']['vars']
+    prop, value, prop_of_value, value_of_prop_of_value = answer['head']['vars']
 
     output = {}
     for row in answer['results']['bindings']:
