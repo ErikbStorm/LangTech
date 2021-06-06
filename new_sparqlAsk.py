@@ -46,6 +46,7 @@ def main():
                 #"How long is Frozen?",
                 #"How long is Brad Pitt?",
                 "Where was The Avengers filmed?"
+                'Which locations were used to film the movie "Black Panther"(2018)'
                  ]
 
     links = readJson('property_links.json')
@@ -124,7 +125,8 @@ def ask(question, links):
             answer = findPropCombo2(linked_props, ent2, properties)
             if answer is not None:
                 answers += answer
-        print("Answers: ", answers)
+        if (DEBUG):
+            print("Answers: ", answers)
 
         #If there are still no answers...
 
@@ -157,8 +159,10 @@ def ask(question, links):
                 if answer != ['No']:
                     answers += answer
 
-        return answers
-    
+        if answers:
+            return answers
+        else:
+            return ['No']
     #Execute this if there are 3 entities.
     elif len(ent) == 3:
         if (DEBUG):
@@ -254,7 +258,7 @@ def askYesNo(parse, ent, question, links):
 
 
     if parse[0].text == 'Is':
-        for prop in linked_props.values():
+        for prop in linked_props:
             if prop in properties:
                 search_list = [term.lemma_ for term in search_props]
                 if any(term in search_list for term in properties[prop]):
@@ -290,7 +294,7 @@ def askYesNo2(parse, ent, question, links):
         answers.append(findPropCombo2(linked_props, ent2, properties))
 
         if parse[0].text == 'Is':
-            for prop in linked_props.values():
+            for prop in linked_props:
                 if prop in properties:
                     search_list = [term.lemma_ for term in search_props]
                     if any(term in search_list for term in properties[prop]):
