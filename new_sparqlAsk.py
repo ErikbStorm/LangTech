@@ -69,14 +69,14 @@ def ask(question, links, debug=False):
                             question=question,
                             links=links)
 
-        search_props = removeStopWords(question, ent.text)
+        search_props = removeStopWords(question, ent)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent.text)
+        ent_ids = getEntIds(ent)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
 
-        best_ent_id = getBestEntId(ent.text, ent_ids)
+        best_ent_id = getBestEntId(ent, ent_ids)
 
         print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
@@ -103,9 +103,9 @@ def ask(question, links, debug=False):
         return []
 
 def askCount(parse, ent, question, links):
-    search_props = removeStopWords(question, ent.text)
+    search_props = removeStopWords(question, ent)
     print("Search properties: " , search_props)
-    ent_ids = getEntIds(ent.text)
+    ent_ids = getEntIds(ent)
 
     linked_props = getBestProp(search_props, links)
     print("Linked properties: " , linked_props)
@@ -115,7 +115,7 @@ def askCount(parse, ent, question, links):
     return len(findPropCombo(linked_props, properties))
 
 def askYesNo(parse, ent, question, links):
-    search_props = removeStopWords(question, ent.text)
+    search_props = removeStopWords(question, ent)
     print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
@@ -133,11 +133,11 @@ def askYesNo(parse, ent, question, links):
     #        print(p, " : ", v)
     
     print(f"Linkded prop: {properties[linked_prop]}")
-    if parse[0].text == 'Is':
+    if parse[0] == 'Is':
         for prop in search_props:
-            if properties[linked_prop][0] == prop.text:
+            if properties[linked_prop][0] == prop:
                 return "Yes"
-            if prop.text in properties[linked_prop][0]:
+            if prop in properties[linked_prop][0]:
                 return "Yes"
         for token in parse:
             if token.pos_ == "ADJ":
@@ -256,7 +256,7 @@ def removeStopWords(question, ent):
     question = question.replace(ent, '')
     no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
-                         and word.text != ' ') or word.i == 0]
+                         and word != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
@@ -266,7 +266,7 @@ def removeStopWords2(question, ent):
         question = question.replace(e, '')
     no_stop_words = [word for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
-                     and word.text != ' ') or word.i == 0]
+                     and word != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
