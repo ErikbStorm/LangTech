@@ -114,13 +114,52 @@ def ask(question, links):
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
-            ent2 = [ent for x in ent if x != ent[i]][0]
+            ent2 = [x for x in ent if x != ent[i]][0]
             answers.append(findPropCombo2(linked_props, ent2, properties))
         return answers[0]
     elif len(ent) == 3:
         search_props = removeStopWords2(question, ent)
+        answers = []
+        ents21 = ent[0] + ' ' + ent[1]
+        ents22 = ent[1] + ' ' + ent[2]
+        ents23 = ent[0] + ' ' + ent[2]
+        for i in range(len(ents21)):
+            ent_ids = getEntIds(ents21[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
 
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents21[i], ent_ids)
 
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents21 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        for i in range(len(ents22)):
+            ent_ids = getEntIds(ents22[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
+
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents22[i], ent_ids)
+
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents22 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        for i in range(len(ents23)):
+            ent_ids = getEntIds(ents23[i])
+            linked_props = getBestProp(search_props, links)
+            if (DEBUG):
+                print("Linked properties: ", linked_props)
+
+                print("entity ids: ", ent_ids)
+            best_ent_id = getBestEntId(ents22[i], ent_ids)
+
+            properties = getPropertiesExtended(best_ent_id)
+            ent2 = [x for x in ents23 if x != ent[i]][0]
+            answers.append(findPropCombo2(linked_props, ent2, properties))
+        return answers[0]
     else:
         return 'No'
 
