@@ -232,7 +232,7 @@ def askCount(parse, ent, question, links):
     if "number" in search_list:
         for key, prop in linked_props:
             for term in search_list:
-                if term in prop and term is not "number":
+                if term in prop and term != "number":
                     return [str(findPropCombo([(0,prop)], properties))] 
 
     # Count results
@@ -259,8 +259,6 @@ def askYesNo(parse, ent, question, links):
     if (DEBUG):
         print("Prop combo: " , prop_combo)
 
-
-
     if parse[0].text == 'Is':
         for key, prop in linked_props:
             if prop in properties:
@@ -271,7 +269,7 @@ def askYesNo(parse, ent, question, links):
         # for token in parse:
         #     if token.pos_ == "ADJ":
         #         return "Yes"
-    elif len(linked_props) > 1:
+    elif len(linked_props) > 0:
             return ["Yes"]
             
     return ["No"]
