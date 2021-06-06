@@ -4,9 +4,9 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_lg")
-ruler = nlp.add_pipe("entity_ruler")
-ruler.from_disk("patterns.jsonl")
+nlp = spacy.load("en_core_web_sm")
+#ruler = nlp.add_pipe("entity_ruler")
+#ruler.from_disk("patterns.jsonl")
 
 
 def main():
@@ -67,14 +67,14 @@ def ask(question, links, debug=False):
                             question=question,
                             links=links)
 
-        search_props = removeStopWords(question, ent)
+        search_props = removeStopWords(question, ent.text)
         print("Search properties: " , search_props)
-        ent_ids = getEntIds(ent)
+        ent_ids = getEntIds(ent.text)
 
         linked_props = getBestProp(search_props, links)
         print("Linked properties: " , linked_props)
 
-        best_ent_id = getBestEntId(ent, ent_ids)
+        best_ent_id = getBestEntId(ent.text, ent_ids)
 
         print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
@@ -101,9 +101,9 @@ def ask(question, links, debug=False):
         return []
 
 def askCount(parse, ent, question, links):
-    search_props = removeStopWords(question, ent)
+    search_props = removeStopWords(question, ent.text)
     print("Search properties: " , search_props)
-    ent_ids = getEntIds(ent)
+    ent_ids = getEntIds(ent.text)
 
     linked_props = getBestProp(search_props, links)
     print("Linked properties: " , linked_props)
@@ -113,7 +113,7 @@ def askCount(parse, ent, question, links):
     return len(findPropCombo(linked_props, properties))
 
 def askYesNo(parse, ent, question, links):
-    search_props = removeStopWords(question, ent)
+    search_props = removeStopWords(question, ent.text)
     print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
@@ -296,27 +296,47 @@ def getAnswer(search_pred, properties):
 
     return distances[id_with_lowest_distance]
 
-def getProperties(ent_id):
+def getProperties(ent_id, extended=False):
     print(ent_id)
     url = 'https://query.wikidata.org/sparql'
 
-    query = ''' SELECT ?wdLabel ?ps_Label{
-                VALUES (?company) {(wd:'''+ ent_id[0] +''')}
-                
-                ?company ?p ?statement .
-                ?statement ?ps ?ps_ .
-                
-                ?wd wikibase:claim ?p.
-                ?wd wikibase:statementProperty ?ps.
-                
-                
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                } ORDER BY ?wd ?statement ?ps_
-                '''
+    if extended:
+        query = '''
+                    SELECT ?wdLabel ?ps_Label ?wdpqLabel ?pq_Label {
+                    VALUES (?company) {(wd:'''+ ent_id[0] +''')}
+
+                    ?company ?p ?statement .
+                    ?statement ?ps ?ps_ .
+
+                    ?wd wikibase:claim ?p.
+                    ?wd wikibase:statementProperty ?ps.
+
+                    OPTIONAL {
+                    ?statement ?pq ?pq_ .
+                    ?wdpq wikibase:qualifier ?pq .
+                    }
+
+                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+                    } ORDER BY ?wd ?statement ?ps_
+                    '''
+    else:
+        query = ''' SELECT ?wdLabel ?ps_Label{
+                    VALUES (?company) {(wd:'''+ ent_id[0] +''')}
+                    
+                    ?company ?p ?statement .
+                    ?statement ?ps ?ps_ .
+                    
+                    ?wd wikibase:claim ?p.
+                    ?wd wikibase:statementProperty ?ps.
+                    
+                    
+                    SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+                    } ORDER BY ?wd ?statement ?ps_
+                    '''
 
     answer = execQuery(query, url)
 
-    #print(answer.keys())
+    print(answer)
 
     prop, value = answer['head']['vars']
 
