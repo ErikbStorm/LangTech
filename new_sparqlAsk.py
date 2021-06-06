@@ -319,7 +319,10 @@ def getBestEntId(ent_name, ent_ids):
 
     if (DEBUG):
         print(output)
-    return sorted(output, key = lambda x: x[2])[0]
+    try:
+        return sorted(output, key = lambda x: x[2])[0]
+    except:
+        print("No entities found!")
 
 def findPropCombo(linked_props, properties):
     '''

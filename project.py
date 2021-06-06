@@ -4,24 +4,29 @@ import new_sparqlAsk
 def main():
     #for x, y in new_sparqlAsk.getPropertiesExtended(['Q127367']).items():
     #    print(x, " : ", y)
-    evalQuestions('all_questions_with_answers.tsv', write=True)
+    evalQuestions('all_questions_with_answers.tsv', write=False)
 
 def ask(question):
     pass
 
-def evalQuestions(filename, write=False):
+def evalQuestions(filename, write=True):
     output = []
     links = new_sparqlAsk.readJson('property_links.json')
     with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
         for i, row in enumerate(file):
-            if i > 930 and i < 936:
+            if i > 1100 and i < 1110:
                 question = row[0]
                 wiki_id = row[1]
                 corr_answers = [answ.strip() for answ in row[2:]]
 
                 print(question)
-                sys_answers = new_sparqlAsk.ask(question, links)
+                try:
+                    sys_answers = new_sparqlAsk.ask(question, links)
+                except Exception as e:
+                    #If program fails, then answer with No
+                    print(e)
+                    sys_answers = ['No']
                 #print("Systeem antwoord: ", sys_answers)
                 print(sys_answers, corr_answers)
                 score = evaluate(sys_answers, corr_answers)
@@ -47,6 +52,8 @@ def evaluate(sys_answers, all_corr_answers):
         @return A score indicating how good the answers are.
     '''
     if sys_answers != None:
+        sys_answers = [answ.lower() for answ in sys_answers]
+        all_corr_answers = [answ.lower() for answ in all_corr_answers]
         precision = getPrecision(sys_answers, all_corr_answers)
         recall = getRecall(sys_answers, all_corr_answers)
         if recall == 1 and precision == 1:
