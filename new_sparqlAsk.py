@@ -4,9 +4,9 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_sm")
-#ruler = nlp.add_pipe("entity_ruler")
-#ruler.from_disk("patterns.jsonl")
+nlp = spacy.load("en_core_web_trf")
+ruler = nlp.add_pipe("entity_ruler")
+ruler.from_disk("patterns.jsonl")
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked for Frozen?"
+                "How many voice actors worked for Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -41,6 +41,8 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
+                "How long is Frozen?",
+                "How long is Brad Pitt?"
                  ]
 
     links = readJson('property_links.json')
@@ -154,6 +156,7 @@ def getBestEntId(ent_name, ent_ids):
     #print(ent_ids)
     i = 0
     for ent_id, found_ent in ent_ids:
+        print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -233,17 +236,16 @@ def readJson(filename):
 def getEnt(parse):
     entity = list()
     if not parse.ents:
-        return 'FUUUUUCK'
-        # for word in parse[1:]:
-        #     if word.text.istitle() or word.text[0].isdigit():
-        #         entity.append(int(word.i))
-        # if entity:
-        #     return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
-        # else:
-        #     return entity
+        for word in parse[1:]:
+            if word.text.istitle() or word.text[0].isdigit():
+                entity.append(int(word.i))
+        if entity:
+            return [' '.join(word.text for word in parse[entity[0]:(entity[-1]+1)])]
+        else:
+            return entity
     else:
         for ent in parse.ents:
-            entity.append(ent)
+            entity.append(ent.text)
     return entity
 
 
@@ -263,8 +265,8 @@ def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
     no_stop_words = [word for word in nlp(question)
-                        if (word.pos_ != 'PUNCT' # and not word.is_stop
-                        and word.text != ' ') or word.i == 0]
+                     if (word.pos_ != 'PUNCT' # and not word.is_stop
+                     and word.text != ' ') or word.i == 0]
     print(no_stop_words)
 
     return no_stop_words
