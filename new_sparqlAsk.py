@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = False
+DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -384,8 +384,7 @@ def getProperties(ent_id):
 
     answer = execQuery(query, url)
 
-    if (DEBUG):
-        print(answer)
+    #print(answer)
 
     prop, value = answer['head']['vars']
 
