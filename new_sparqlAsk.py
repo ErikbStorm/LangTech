@@ -105,7 +105,7 @@ def ask(question, links):
                 print("entity ids: ", ent_ids)
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
-            properties = getProperties(best_ent_id)
+            properties = getPropertiesExtended(best_ent_id)
             answers.append(findPropCombo(linked_props, properties))
         if len(answers) == 1:
             return answers[0]
@@ -113,6 +113,7 @@ def ask(question, links):
             return answers[1]
     elif len(ent) == 3:
         search_props = removeStopWords2(question, ent)
+
 
     else:
         return 'No'
@@ -283,9 +284,9 @@ def removeStopWords(question, ent):
         Takes in a question in string form and return a list with spacy objects.
     '''
     question = question.replace(ent, '')
-    no_stop_words = [word for word in nlp(question)
+    no_stop_words = [word.text for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
-                         and word != ' ') or word.i == 0]
+                         and word.text != ' ') or word.i == 0]
 
     if (DEBUG):
         print(no_stop_words)
@@ -295,9 +296,9 @@ def removeStopWords(question, ent):
 def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
-    no_stop_words = [word for word in nlp(question)
+    no_stop_words = [word.text for word in nlp(question)
                      if (word.pos_ != 'PUNCT' # and not word.is_stop
-                     and word != ' ') or word.i == 0]
+                     and word.text != ' ') or word.i == 0]
 
     if (DEBUG):
         print(no_stop_words)
