@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = False
+DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -21,7 +21,7 @@ def main():
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "Is Brad Pitt female?",
-                # "Did Frozen win an award?",
+                "Did Frozen win an award?",
                 # "Did Frozen win any awards?",
                 # 'Which company distributed Avatar?',
                 # 'Who is the mommy of Leonardo diCaprio?',
@@ -39,7 +39,7 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?",
-                # 'Which company distributed Avatar?',
+                'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
@@ -181,7 +181,7 @@ def askCount(parse, ent, question, links):
         print("Linked properties: " , linked_props)
 
     properties = getProperties(ent_ids[0])
-    
+
     # Count results
     return len(findPropCombo(linked_props, properties))
 
@@ -194,9 +194,6 @@ def askYesNo(parse, ent, question, links):
         print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
-    linked_prop = getBestProp(search_props, links)
-    if (DEBUG):
-        print("Linked properties: " , linked_prop)
 
     # for token in parse:
     #     print(f"Lemma: {token.lemma_}")
@@ -204,14 +201,20 @@ def askYesNo(parse, ent, question, links):
     if len(ent_ids) == 0:
         return "No entities found"
     properties = getProperties(ent_ids[0])
-    
+
+    linked_prop = getBestProp(search_props, links)
+    if (DEBUG):
+        print("Linked properties: " , linked_prop)
+
     #for p, v in properties.items():
     #        print(p, " : ", v)
+    
     if (DEBUG):
         print(f"Linkded prop: {properties[linked_prop]}")
-    if parse[0] == 'Is':
+
+    if parse[0].text == 'Is':
         for prop in search_props:
-            if properties[linked_prop][0] == prop:
+            if properties[linked_prop][0] == prop.text:
                 return "Yes"
             if prop in properties[linked_prop][0]:
                 return "Yes"
@@ -301,17 +304,17 @@ def execQuery(query, url):
         return execQuery(query, url)
 
     return results
-    
+
 def getEntIds(entity):
     url = 'https://www.wikidata.org/w/api.php'
-    params = {'action':'wbsearchentities', 
+    params = {'action':'wbsearchentities',
           'language':'en',
           'type' : 'item',
           'format':'json'}
-    
+
     params['search'] = entity
     json = requests.get(url,params).json()
-    
+
     p_ids = getIds(json)
     return p_ids[:5]
 
@@ -409,22 +412,21 @@ def getProperties(ent_id):
 
     query = ''' SELECT ?wdLabel ?ps_Label{
                 VALUES (?company) {(wd:'''+ ent_id[0] +''')}
-                
+
                 ?company ?p ?statement .
                 ?statement ?ps ?ps_ .
-                
+
                 ?wd wikibase:claim ?p.
                 ?wd wikibase:statementProperty ?ps.
-                
-                
+
+
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
                 } ORDER BY ?wd ?statement ?ps_
                 '''
 
     answer = execQuery(query, url)
 
-    if (DEBUG):
-        print(answer)
+    #print(answer)
 
     prop, value = answer['head']['vars']
 
@@ -459,7 +461,7 @@ def getPropertiesExtended(ent_id):
                     }
 
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
-                    } 
+                    }
                     ORDER BY ?wd ?statement ?ps_
                     '''
 
