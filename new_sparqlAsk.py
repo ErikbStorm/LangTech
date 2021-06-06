@@ -54,6 +54,7 @@ def main():
         answer = ask(question, links)
         print(f"Answer: {answer}")
 
+
 def ask(question, links):
     parse = nlp(question)
     ent = getEnt(parse)
@@ -208,6 +209,7 @@ def ask(question, links):
     else:
         return ['No']
 
+
 def askCount(parse, ent, question, links):
     ''''
     Processes a question and counts the amount of results
@@ -237,6 +239,7 @@ def askCount(parse, ent, question, links):
 
     # Count results
     return [str(len(findPropCombo(linked_props, properties)))]
+
 
 def askYesNo(parse, ent, question, links):
     ''''
@@ -309,6 +312,7 @@ def askYesNo2(parse, ent, question, links):
             return ["Yes"]
     return ["No"]
 
+
 def getBestEntId(ent_name, ent_ids):
     '''
         Finds the entity found by sparql that has the lowest levenshtein distance
@@ -330,6 +334,7 @@ def getBestEntId(ent_name, ent_ids):
     except:
         print("No entities found!")
 
+
 def findPropCombo(linked_props, properties):
     '''
         Checks what the best property for the linked properties is.
@@ -347,6 +352,7 @@ def findPropCombo(linked_props, properties):
         else:
             del linked_props[0]
             return findPropCombo(linked_props, properties)
+
 
 def findPropCombo2(linked_props, entity2, properties):
     '''
@@ -391,6 +397,7 @@ def execQuery(query, url):
 
     return results
 
+
 def getEntIds(entity):
     url = 'https://www.wikidata.org/w/api.php'
     params = {'action':'wbsearchentities',
@@ -403,6 +410,7 @@ def getEntIds(entity):
 
     p_ids = getIds(json)
     return p_ids[:5]
+
 
 def getIds(json):
     ids = []
@@ -452,6 +460,7 @@ def removeStopWords(question, ent):
 
     return no_stop_words
 
+
 def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
@@ -492,6 +501,7 @@ def getAnswer(search_pred, properties):
     id_with_lowest_distance = min(distances.keys())
 
     return distances[id_with_lowest_distance]
+
 
 def getProperties(ent_id):
     if (DEBUG):
