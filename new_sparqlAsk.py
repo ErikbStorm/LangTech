@@ -200,7 +200,7 @@ def askYesNo(parse, ent, question, links):
 
     linked_props = getBestProp(search_props, links)
     if (DEBUG):
-        print("Linked properties: " , linked_prop)
+        print("Linked properties: " , linked_props)
 
     if len(ent_ids) == 0:
         return "No entities found"
@@ -209,6 +209,7 @@ def askYesNo(parse, ent, question, links):
     prop_combo = findPropCombo(linked_props, properties)
     if (DEBUG):
         print("Prop combo: " , prop_combo)
+
 
 
     if parse[0].text == 'Is':
@@ -223,6 +224,41 @@ def askYesNo(parse, ent, question, links):
         #         return "Yes"
     else:
         if len(linked_props) > 1:
+            return "Yes"
+    return "No"
+
+
+def askYesNo2(parse, ent, question, links):
+    ''''
+    Processes a question and checks if a property appears in the results
+    '''
+    search_props = removeStopWords2(question, ent)
+
+    answers = []
+    for i in range(len(ent)):
+        ent_ids = getEntIds(ent[i])
+        linked_props = getBestProp(search_props, links)
+        if (DEBUG):
+            print("Linked properties: ", linked_props)
+
+            print("entity ids: ", ent_ids)
+        best_ent_id = getBestEntId(ent[i], ent_ids)
+
+        properties = getPropertiesExtended(best_ent_id)
+        ent2 = [x for x in ent if x != ent[i]][0]
+        answers.append(findPropCombo2(linked_props, ent2, properties))
+
+        if parse[0].text == 'Is':
+            for prop in linked_props.values():
+                if prop in properties:
+                    search_list = [term.lemma_ for term in search_props]
+                    if any(term in search_list for term in properties[prop]):
+                        return "Yes"
+
+        # for token in parse:
+        #     if token.pos_ == "ADJ":
+        #         return "Yes"
+        elif len(linked_props) > 1:
             return "Yes"
     return "No"
 
