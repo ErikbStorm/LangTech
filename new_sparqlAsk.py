@@ -154,7 +154,7 @@ def ask(question, links):
                 print("Linked properties: ", linked_props)
 
                 print("entity ids: ", ent_ids)
-            best_ent_id = getBestEntId(ents22[i], ent_ids)
+            best_ent_id = getBestEntId(ents23[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ents23 if x != ent[i]][0]
