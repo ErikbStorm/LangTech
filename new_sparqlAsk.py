@@ -4,7 +4,7 @@ import json
 import spacy
 from Levenshtein import distance as lev
 
-nlp = spacy.load("en_core_web_trf")
+nlp = spacy.load("en_core_web_lg")
 ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
@@ -89,18 +89,26 @@ def ask(question, links, debug=False):
     elif len(ent) == 2:
         search_props = removeStopWords2(question, ent)
         print("Search properties: ", search_props)
+        answers = []
         for i in range(len(ent)):
             ent_ids = getEntIds(ent[i])
-            linked_prop = getBestProp(search_props, links)
-            print("Linked properties: ", linked_prop)
+            linked_props = getBestProp(search_props, links)
+            print("Linked properties: ", linked_props)
 
             print("entity ids: ", ent_ids)
             best_ent_id = getBestEntId(ent[i], ent_ids)
 
             properties = getProperties(best_ent_id)
+            answers.append(findPropCombo(linked_props, properties))
+        if len(answers) == 1:
+            return answers[0]
+        else:
+            return answers[1]
+    elif len(ent) == 3:
+        search_props = removeStopWords2(question, ent)
+
     else:
-        print('No entities found!')
-        return []
+        return 'No'
 
 def askCount(parse, ent, question, links):
     search_props = removeStopWords(question, ent)
