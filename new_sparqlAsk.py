@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = False
+DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -151,7 +151,7 @@ def ask(question, links):
                 print("Linked properties: ", linked_props)
 
                 print("entity ids: ", ent_ids)
-            best_ent_id = getBestEntId(ents22[i], ent_ids)
+            best_ent_id = getBestEntId(ents23[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ents23 if x != ent[i]][0]
@@ -421,8 +421,7 @@ def getProperties(ent_id):
 
     answer = execQuery(query, url)
 
-    if (DEBUG):
-        print(answer)
+    #print(answer)
 
     prop, value = answer['head']['vars']
 
