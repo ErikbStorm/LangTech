@@ -20,7 +20,7 @@ def main():
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
-                # "Is Brad Pitt female?",
+                "Is Brad Pitt female?",
                 "Did Frozen win an award?",
                 # "Did Frozen win any awards?",
                 # 'Which company distributed Avatar?',
@@ -89,9 +89,6 @@ def ask(question, links):
             print("entity ids: ", ent_ids)
         properties = getProperties(best_ent_id)
 
-        #if (DEBUG):
-        #   for p, v in properties.items():
-        #       print(p, " : ", v)
 
         answer = findPropCombo(linked_props.copy(), properties)
         if answer == ['No']:
@@ -161,7 +158,7 @@ def ask(question, links):
                 print("Linked properties: ", linked_props)
 
                 print("entity ids: ", ent_ids)
-            best_ent_id = getBestEntId(ents22[i], ent_ids)
+            best_ent_id = getBestEntId(ents23[i], ent_ids)
 
             properties = getPropertiesExtended(best_ent_id)
             ent2 = [x for x in ents23 if x != ent[i]][0]
@@ -201,35 +198,31 @@ def askYesNo(parse, ent, question, links):
         print("Search properties: " , search_props)
     ent_ids = getEntIds(ent)
 
-
-    # for token in parse:
-    #     print(f"Lemma: {token.lemma_}")
+    linked_props = getBestProp(search_props, links)
+    if (DEBUG):
+        print("Linked properties: " , linked_prop)
 
     if len(ent_ids) == 0:
         return "No entities found"
     properties = getProperties(ent_ids[0])
 
-    linked_prop = getBestProp(search_props, links)
+    prop_combo = findPropCombo(linked_props, properties)
     if (DEBUG):
-        print("Linked properties: " , linked_prop)
+        print("Prop combo: " , prop_combo)
 
-    #for p, v in properties.items():
-    #        print(p, " : ", v)
-    
-    if (DEBUG):
-        print(f"Linked prop: {properties[linked_prop]}")
 
     if parse[0].text == 'Is':
-        for prop in search_props:
-            if properties[linked_prop][0] == prop.text:
-                return "Yes"
-            if prop in properties[linked_prop][0]:
-                return "Yes"
-        for token in parse:
-            if token.pos_ == "ADJ":
-                return "Yes"
+        for prop in linked_props.values():
+            if prop in properties:
+                search_list = [term.lemma_ for term in search_props]
+                if any(term in search_list for term in properties[prop]):
+                    return "Yes"
+                
+        # for token in parse:
+        #     if token.pos_ == "ADJ":
+        #         return "Yes"
     else:
-        if properties[linked_prop][0]:
+        if len(linked_props) > 1:
             return "Yes"
     return "No"
 
