@@ -8,7 +8,7 @@
     "original broadcaster": ["company", "distribute"],
     "country of origin": ["country", "origin", "come", "from", "land"],
     "screenwriter": ["screenwriter", "write", "writer"],
-    "duration": ["duration", "length", "long"],
+    "duration": ["long", "duration", "length", "how"],
     "review score": ["review", "score", "rating"],
     "catchphrase" : ["catchphrase", "what"],
     "number of episodes" : ["number", "episode"],
@@ -56,7 +56,7 @@
     "follows": ["follows", "successor", "succeed"],
     "instance of": ["what", "animate"],
     "executive producer": ["executive", "producer", "produce"],
-    "production company": ["production", "company", "produce"],
+    "production company": ["production", "company", "produce", "which"],
     "publication date": ["date", "publication", "publish", "release", "when", "time", "launch", "come", "out"],
     "director of photography": ["cinematographer", "photography", "phtographer", "photo"],
     "country of citizenship": ["citizen", "country", "citizenship", "national", "nationality"],
@@ -82,5 +82,5 @@
     "characters": ["character", "appear"],
     "depicts": ["depict", "depiction", "portray", "subject", "picture", "motif"],
     "fabrication method": ["fabrication", "make", "process", "production", "produce"],
-    "distribution format": ["media", "type", "format", "distribute", "medium", "distribution"]
+    "distribution format": ["media", "type", "format", "distribute", "medium", "distribution", "how"]
 }
