@@ -13,15 +13,15 @@ DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
-                'Who were the composers for Batman Begins?',
-                'What awards did Frozen receive?',
-                'How many awards did Frozen receive?',
+                #'Who were the composers for Batman Begins?',
+                #'What awards did Frozen receive?',
+                #'How many awards did Frozen receive?',
                 # 'How old is Jim Carrey?',
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
-                "Is Brad Pitt female?",
-                "Did Frozen win an award?",
+                #"Is Brad Pitt female?",
+                #"Did Frozen win an award?",
                 # "Did Frozen win any awards?",
                 # 'Which company distributed Avatar?',
                 # 'Who is the mommy of Leonardo diCaprio?',
@@ -39,14 +39,15 @@ def main():
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?",
-                'Which company distributed Avatar?',
+               # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
                 #"How long is Frozen?",
                 #"How long is Brad Pitt?",
-                "Where was The Avengers filmed?"
-                'Which locations were used to film the movie "Black Panther"(2018)'
+                #"Where was The Avengers filmed?"
+                #'Which locations were used to film the movie "Black Panther"(2018)'
+                "Who is the main character in Fifty Shades of Grey?"
                  ]
 
     links = readJson('property_links.json')
@@ -347,7 +348,7 @@ def getBestEntId(ent_name, ent_ids):
         print("No entities found!")
 
 
-def findPropCombo(linked_props, properties):
+def findPropCombo(linked_props, properties, search_props=None):
     '''
         Checks what the best property for the linked properties is.
         Will return the final answer.
@@ -359,9 +360,20 @@ def findPropCombo(linked_props, properties):
         best_Linked_prop = linked_props[0][1]
         #print(best_Linked_prop)
         if best_Linked_prop in properties:
-            #print("Antwoord ", properties[best_Linked_prop])
-            if type(properties[best_Linked_prop]) == list:
-                pass
+            print("Antwoordx ", properties[best_Linked_prop])
+
+            #If it is a list then execute this.
+            
+            if type(properties[best_Linked_prop][0]) == set:
+                return [z for _, _, z in properties[best_Linked_prop]]
+                for item in properties[best_Linked_prop]:
+                    val = item[0]
+                    prop = item[1]
+                    val_of_prop = item[2]
+
+                    getBestProp(search_props, linked_props)
+
+
             else:
                 return properties[best_Linked_prop]
         else:
@@ -593,8 +605,6 @@ def getPropertiesExtended(ent_id):
     for row in answer['results']['bindings']:
         r_prop = row[prop]['value']
         r_val = row[value]['value']
-        r_prop_of_value = row[prop_of_value]['value']
-        r_val_value = row[value_of_prop_of_value]['value']
 
         if r_prop in output:
             output[r_prop].append(r_val)
@@ -603,10 +613,12 @@ def getPropertiesExtended(ent_id):
 
         #Inserting the properties of the values.
         if prop_of_value in row:
+            r_prop_of_value = row[prop_of_value]['value']
+            r_val_value = row[value_of_prop_of_value]['value']
             if r_prop_of_value in output:
-                output[r_prop_of_value].append((r_val, r_prop, r_val_value))
+                output[r_prop_of_value].append({r_prop : r_val, "val" : r_val_value})
             else:
-                output[r_prop_of_value] = [(r_val, r_prop, r_val_value)]
+                output[r_prop_of_value] = [{r_prop : r_val, "val" : r_val_value}]
 
     print(output)
 
