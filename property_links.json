@@ -68,11 +68,12 @@
     "languages spoken, written or signed": ["language", "speak", "write", "sign"],
     "educated at": ["education", "educate", "school", "go", "where", "attend", "university"],
     "lifestyle": ["lifestyle", "style", "life", "vegan", "vegetarian"],
-    "date of death": ["when", "die", "death"],
-    "cause of death": ["how", "die", "death"],
-    "place of death": ["where", "die", "death"],
-    "costume designer": ["costume", "design"],
     "test taken": ["Bechdel", "test", "reverse", "Mako", "Mori"],
+    "date of death": ["when", "die", "death", "date"],
+    "cause of death": ["how", "die", "death", "cause", "what"],
+    "place of death": ["where", "die", "death", "place"],
+    "manner of death" : ["manner", "death", "die"],
+    "costume designer": ["costume", "design", "who"],
     "named after" : ["name", "after"],
     "voice actor": ["voice", "actor", "dub", "actress", "vocal"],
     "has edition or translation": ["translation", "translate", "edition", "version"],
@@ -93,5 +94,7 @@
     "character role" : ["main", "character", "play"],
     "employer": ["work", "at", "employ"],
     "distributed by": ["distribute", "by", "company", "organisation"],
-    "notable work": ["notable", "work", "know", "for"]
+    "notable work": ["notable", "work", "know", "for"],
+    "number of subscribers" : ["user", "subscriber", "number", "of", "follower"],
+    "social media followers" : ["social", "media", "follower", "Twitter", "Instagram", "how", "many", "amount", "number"]
 }
