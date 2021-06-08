@@ -106,10 +106,7 @@ def ask(question, links):
         answer = findPropCombo(linked_props.copy(), properties)
 
         #If still no answer, try the same properties for a different entity.
-        if answer == ['No']:
-            properties = getPropertiesExtended(ent_ids[0])
-            answer = findPropCombo(linked_props, properties)
-        return answer
+        return returnAnswer(linked_props, properties, ent_ids)
     
     #Execute this if there are 2 entities.
     elif len(ent) == 2:
@@ -248,7 +245,7 @@ def askCount(parse, ent, question, links):
     #check if results contains a number
     search_list = [term.text for term in search_props]
 
-    result = findPropCombo(linked_props, properties)
+    result = returnAnswer(linked_props, properties, ent_ids)
     if len(result) == 1 and result[0].isdigit():
         return(str(result))
     else:
@@ -328,6 +325,16 @@ def askYesNo2(parse, ent, question, links):
     return ["No"]
 
 
+def returnAnswer(linked_props, properties, ent_ids):
+    '''
+        Tries 2 different entities, to get a satisfatory answer.
+    ''' 
+    answer = findPropCombo(linked_props.copy(), properties)
+    if answer == ['No']:
+        properties = getProperties(ent_ids[0])
+        answer = findPropCombo(linked_props, properties)
+    return answer
+
 def getBestEntId(ent_name, ent_ids):
     '''
         Finds the entity found by sparql that has the lowest levenshtein distance
@@ -366,16 +373,7 @@ def findPropCombo(linked_props, properties, search_props=None):
             #If it is a list then execute this.
             
             if type(properties[best_Linked_prop][0]) == dict:
-                #if search_props is not None:
-                #    return findBestPropVal(properties[best_Linked_prop], search_props)
                 return [dict['val'] for dict in properties[best_Linked_prop]]
-                for item in properties[best_Linked_prop]:
-                    val = item[0]
-                    prop = item[1]
-                    val_of_prop = item[2]
-
-                    getBestProp(search_props, linked_props)
-
 
             else:
                 return properties[best_Linked_prop]
@@ -403,14 +401,6 @@ def findPropCombo2(linked_props, entity2, properties):
         else:
             del linked_props[0]
             return findPropCombo2(linked_props, entity2, properties)
-
-
-def findBestPropVal(prop_val_list, search_props):
-    '''
-        Find the best property value.
-    '''
-    for prop_val_dict in prop_val_list:
-        prop_val_dict
 
 def execQuery(query, url):
     '''
@@ -643,7 +633,7 @@ def getPropertiesExtended(ent_id):
             else:
                 output[r_prop_of_value] = [{r_prop : r_val, "val" : r_val_value}]
 
-    print(output)
+    #print(output)
 
     return output
 
