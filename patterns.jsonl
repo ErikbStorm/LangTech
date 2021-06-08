@@ -7249,18 +7249,6 @@
 {"label":"MOVIE","pattern":"The Heart"}
 {"label":"MOVIE","pattern":"Keep Going"}
 {"label":"MOVIE","pattern":"Meteors"}
-{"label":"MOVIE","pattern":"An Officer a
-    if len(ent) == 1:
-        ent = ent[0]
-        if parse[0].pos_ == 'AUX':
-            return askYesNo(parse=parse,
-                            ent=ent,
-                            question=question,
-                            links=links)
-
-        splitted_question = question.lower().split()
-        if "how many" in question.lower() or "how much" in question.lower() or "count" in splitted_question or "number" in splitted_question:
-            return askCount(parnd a Spy"}
 {"label":"MOVIE","pattern":"Ren\u00e9"}
 {"label":"MOVIE","pattern":"Wallay"}
 {"label":"MOVIE","pattern":"An Impossibly Small Object"}
