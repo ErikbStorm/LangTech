@@ -1,7 +1,7 @@
 {
     "date of birth" : ["old", "born", "date", "birth", "when"],
     "award received" : ["award", "receive", "win"],
-    "composer" : ["composer", "compose", "write", "music"],
+    "composer" : ["composer", "compose", "write", "music", "create"],
     "genre" : ["kind", "film", "genre", "type", "Christmas"],
     "director" : ["direct", "director"],
     "takes place in fictional universe" : ["take", "place", "set"],
@@ -66,7 +66,7 @@
     "number of children": ["amount", "kid", "child", "number"],
     "hair color": ["color", "colour", "hair"],
     "languages spoken, written or signed": ["language", "speak", "write", "sign"],
-    "educated at": ["education", "educate", "school", "go", "where"],
+    "educated at": ["education", "educate", "school", "go", "where", "attend", "university"],
     "lifestyle": ["lifestyle", "style", "life"],
     "date of death": ["when", "die", "death"],
     "cause of death": ["how", "die", "death"],
@@ -86,5 +86,6 @@
     "based on" : ["base", "on", "inspire", "by"],
     "inspired by" : ["inspire", "by"],
     "followed by" : ["follow", "by", "sequel", "next", "up"],
-    "IMDb ID" : ["imbd", "id"]
+    "IMDb ID" : ["imbd", "id"],
+    "derivative work" : ["late", "work", "derivative", "movie", "film"]
 }

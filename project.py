@@ -4,7 +4,7 @@ import new_sparqlAsk
 def main():
     #for x, y in new_sparqlAsk.getPropertiesExtended(['Q127367']).items():
     #    print(x, " : ", y)
-    evalQuestions('all_questions_with_answers.tsv', write=False)
+    evalQuestions('all_questions_with_answers.tsv', write=True)
 
 def ask(question):
     pass
@@ -15,7 +15,7 @@ def evalQuestions(filename, write=True):
     with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
         for i, row in enumerate(file):
-            if i > 1130 and i < 1150:
+            if i > 0 and i < 100:
                 question = row[0]
                 wiki_id = row[1]
                 corr_answers = [answ.strip() for answ in row[2:]]

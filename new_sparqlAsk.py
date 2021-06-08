@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = False
+DEBUG = True
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -156,7 +156,8 @@ def ask(question, links):
                 #only add answer if it is meaningful.
                 if answer != ['No']:
                     answers += answer
-
+        if len(answers) == 0:
+            answers = ['No']
         return answers
     
     #Execute this if there are 3 entities.
@@ -227,8 +228,13 @@ def askCount(parse, ent, question, links):
 
     properties = getProperties(ent_ids[0])
 
-    # Count results
-    return [len(findPropCombo(linked_props, properties))]
+    #check if results contains a number
+    results = findPropCombo(linked_props, properties)
+    if results[0].isdigit():
+        return results
+    else:
+        # Count results
+        return [len(results)]
 
 def askYesNo(parse, ent, question, links):
     ''''
