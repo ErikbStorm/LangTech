@@ -47,8 +47,8 @@ def main():
                 #"How long is Brad Pitt?",
                 #"Where was The Avengers filmed?"
                 #'Which locations were used to film the movie "Black Panther"(2018)'
-                "Who is the main character in Fifty Shades of Grey?",
-                "How many dollars did Frozen cost?"
+                "Who is the main character in Fifty Shades of Grey?"
+                #"How much did Frozen cost?"
                  ]
 
     links = readJson('property_links.json')
