@@ -44,7 +44,7 @@
     "has part": ["character", "play"],
     "aspect ratio": ["aspect", "ratio", "shoot", "film"],
     "title": ["title", "headline", "full", "know", "original"],
-    "cost": ["budget", "cost", "money"],
+    "cost": ["budget", "cost", "money", "of", "for"],
     "editor": ["editor", "edit"],
     "box office": ["bring", "box", "office", "profit", "make", "money"],
     "main subject": ["subject", "topic", "about", "main", "issue", "regard", "term", "describe", "mention"],
@@ -54,7 +54,7 @@
     "Kijkwijzer rating": ["rating", "kijkwijzer", "wijzer", "age", "allow", "permit"],
     "filming location": ["film", "location", "where", "place", "set"],
     "follows": ["follows", "successor", "succeed"],
-    "instance of": ["what", "animate"],
+    "instance of": ["animate"],
     "executive producer": ["executive", "producer", "produce"],
     "production company": ["production", "company", "produce", "which"],
     "publication date": ["date", "publication", "publish", "release", "when", "time", "launch", "come", "out"],
@@ -89,5 +89,6 @@
     "followed by" : ["follow", "by", "sequel", "next", "up"],
     "derivative work" : ["late", "work", "derivative", "movie", "film"],
     "theme music" : ["theme", "song"],
-    "IMDb ID" : ["imbd", "id"]
+    "IMDb ID" : ["imbd", "id"],
+    "character role" : ["main", "character", "play"]
 }

@@ -57,6 +57,9 @@ def main():
 
 
 def ask(question, links):
+    '''
+        Main function of the program, takes in a question and returns answer.
+    '''
     parse = nlp(question)
     ent = getEnt(parse)
     if (DEBUG):
@@ -69,18 +72,21 @@ def ask(question, links):
                             question=question,
                             links=links)
 
-        if "how many" in question.lower() or "count" in question.lower().split() or "number" in question.lower().split():
+        splitted_question = question.lower().split()
+        if "how many" in question.lower() or "count" in splitted_question or "number" in splitted_question:
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
                             links=links)
 
+        #Retrieve the properties from the question.
         search_props = removeStopWords(question, ent)
         if (DEBUG):
             print("Only one entity detected!")
             print("Search properties: " , search_props)
         ent_ids = getEntIds(ent)
 
+        #Link the propertires of the question to the linked properties.
         linked_props = getBestProp(search_props, links)
         if (DEBUG):
             print("Linked properties: " , linked_props)
@@ -354,7 +360,10 @@ def findPropCombo(linked_props, properties):
         #print(best_Linked_prop)
         if best_Linked_prop in properties:
             #print("Antwoord ", properties[best_Linked_prop])
-            return properties[best_Linked_prop]
+            if type(properties[best_Linked_prop]) == list:
+                pass
+            else:
+                return properties[best_Linked_prop]
         else:
             del linked_props[0]
             return findPropCombo(linked_props, properties)
@@ -480,18 +489,23 @@ def removeStopWords2(question, ent):
     return no_stop_words
 
 
-def getBestProp(search_props, links):
+def getBestProp(search_props, links, stop_word_weight=0.1):
     same_prop_counts = []
     for prop, related_props in links.items():
+        #List with overlapping props
+        same_props = [search_prop for search_prop in search_props if search_prop.lemma_ in related_props]
 
-        same_props = [search_prop.lemma_.lower() for search_prop in search_props if search_prop.lemma_ in related_props]
+        #list of same props without the stop words
+        same_lemma_props_without_stop_words = [prop.lemma_.lower() for prop in same_props if not prop.is_stop]
 
-        same_prop_amount = len(same_props)
+        #list with only stop words
+        same_prop_stop_words = [prop.lemma_.lower() for prop in same_props if prop.is_stop]
+
+        #Same prop amount with stop word weight.
+        same_prop_amount = len(same_lemma_props_without_stop_words) + (stop_word_weight * float(len(same_prop_stop_words)))
 
         same_prop_counts.append((same_prop_amount, prop))
 
-    #print(same_prop_counts)
-    #max_key = max(same_prop_counts.keys())
 
     sorted_counts = sorted(same_prop_counts, key = lambda x: x[0], reverse=True)
 
@@ -577,18 +591,24 @@ def getPropertiesExtended(ent_id):
 
     output = {}
     for row in answer['results']['bindings']:
-        if row[prop]['value'] in output:
-            output[row[prop]['value']].append(row[value]['value'])
+        r_prop = row[prop]['value']
+        r_val = row[value]['value']
+        r_prop_of_value = row[prop_of_value]['value']
+        r_val_value = row[value_of_prop_of_value]['value']
+
+        if r_prop in output:
+            output[r_prop].append(r_val)
         else:
-            output[row[prop]['value']] = [row[value]['value']]
+            output[r_prop] = [r_val]
 
+        #Inserting the properties of the values.
         if prop_of_value in row:
-            if row[prop_of_value]['value'] in output:
-                output[row[prop_of_value]['value']].append((row[value]['value'], row[value_of_prop_of_value]['value']))
+            if r_prop_of_value in output:
+                output[r_prop_of_value].append((r_val, r_prop, r_val_value))
             else:
-                output[row[prop_of_value]['value']] = [(row[value]['value'], row[value_of_prop_of_value]['value'])]
+                output[r_prop_of_value] = [(r_val, r_prop, r_val_value)]
 
-    #print(output)
+    print(output)
 
     return output
 
