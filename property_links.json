@@ -92,5 +92,6 @@
     "theme music" : ["theme", "song"],
     "IMDb ID" : ["imbd", "id"],
     "character role" : ["main", "character", "play"],
-    "number of subscribers" : ["user", "subscriber", "number", "of", "follower"]
+    "number of subscribers" : ["user", "subscriber", "number", "of", "follower"],
+    "social media followers" : ["social", "media", "follower", "Twitter", "Instagram", "how", "many", "amount", "number"]
 }
