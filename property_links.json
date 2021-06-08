@@ -68,10 +68,11 @@
     "languages spoken, written or signed": ["language", "speak", "write", "sign"],
     "educated at": ["education", "educate", "school", "go", "where", "attend", "university"],
     "lifestyle": ["lifestyle", "style", "life"],
-    "date of death": ["when", "die", "death"],
-    "cause of death": ["how", "die", "death"],
-    "place of death": ["where", "die", "death"],
-    "costume designer": ["costume", "design"],
+    "date of death": ["when", "die", "death", "date"],
+    "cause of death": ["how", "die", "death", "cause", "what"],
+    "place of death": ["where", "die", "death", "place"],
+    "manner of death" : ["manner", "death", "die"],
+    "costume designer": ["costume", "design", "who"],
     "test taken": ["Bechdel", "test", "reverse"],
     "named after" : ["name", "after"],
     "voice actor": ["voice", "actor", "dub", "actress", "vocal"],
@@ -90,5 +91,7 @@
     "derivative work" : ["late", "work", "derivative", "movie", "film"],
     "theme music" : ["theme", "song"],
     "IMDb ID" : ["imbd", "id"],
-    "character role" : ["main", "character", "play"]
+    "character role" : ["main", "character", "play"],
+    "number of subscribers" : ["user", "subscriber", "number", "of", "follower"],
+    "social media followers" : ["social", "media", "follower", "Twitter", "Instagram", "how", "many", "amount", "number"]
 }

@@ -13,15 +13,15 @@ DEBUG = False
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
-                'Who were the composers for Batman Begins?',
-                'What awards did Frozen receive?',
-                'How many awards did Frozen receive?',
+                #'Who were the composers for Batman Begins?',
+                #'What awards did Frozen receive?',
+                #'How many awards did Frozen receive?',
                 # 'How old is Jim Carrey?',
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
-                "Is Brad Pitt female?",
-                "Did Frozen win an award?",
+                #"Is Brad Pitt female?",
+                #"Did Frozen win an award?",
                 # "Did Frozen win any awards?",
                 # 'Which company distributed Avatar?',
                 # 'Who is the mommy of Leonardo diCaprio?',
@@ -34,19 +34,23 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                #"How many voice actors worked for Frozen?",
+                "How many voice actors worked on Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?",
-                'Which company distributed Avatar?',
+                # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
                 #"How long is Frozen?",
                 #"How long is Brad Pitt?",
-                "Where was The Avengers filmed?"
-                'Which locations were used to film the movie "Black Panther"(2018)'
+                #"Where was The Avengers filmed?"
+                #'Which locations were used to film the movie "Black Panther"(2018)'
+                "Who is the main character in Fifty Shades of Grey?",
+                "What is the sequel to Fifty Shades of Grey?",
+                "How many Twitter followers does Tom Hanks have?"
+                "How much did Frozen cost?"
                  ]
 
     links = readJson('property_links.json')
@@ -73,7 +77,7 @@ def ask(question, links):
                             links=links)
 
         splitted_question = question.lower().split()
-        if "how many" in question.lower() or "count" in splitted_question or "number" in splitted_question:
+        if "how many" in question.lower() or "how much" in question.lower() or "count" in splitted_question or "number" in splitted_question:
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
@@ -95,13 +99,15 @@ def ask(question, links):
         ent_ids.remove(best_ent_id[:2])
 
         if (DEBUG):
-            print("entity ids: ", ent_ids)
-        properties = getProperties(best_ent_id)
+            print("Entity ids: ", ent_ids)
+        properties = getPropertiesExtended(best_ent_id)
 
-
+        #First try to find answer with changing the properties
         answer = findPropCombo(linked_props.copy(), properties)
+
+        #If still no answer, try the same properties for a different entity.
         if answer == ['No']:
-            properties = getProperties(ent_ids[0])
+            properties = getPropertiesExtended(ent_ids[0])
             answer = findPropCombo(linked_props, properties)
         return answer
     
@@ -242,16 +248,12 @@ def askCount(parse, ent, question, links):
     #check if results contains a number
     search_list = [term.text for term in search_props]
 
-    if "number" in search_list:
-        for key, prop in linked_props:
-            for term in search_list:
-                if term in prop and term != "number":
-                    return [str(findPropCombo([(0,prop)], properties))]
-
-    #TODO Als result een nummer is het nummer returnen
-
-    # Count results
-    return [str(len(findPropCombo(linked_props, properties)))]
+    result = findPropCombo(linked_props, properties)
+    if len(result) == 1 and result[0].isdigit():
+        return(str(result))
+    else:
+        # Count results
+        return [str(len(result))]
 
 
 def askYesNo(parse, ent, question, links):
@@ -334,8 +336,7 @@ def getBestEntId(ent_name, ent_ids):
     output = []
     i = 0
     for ent_id, found_ent in ent_ids:
-        if (DEBUG):
-            print(found_ent, ent_name)
+        #print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -348,7 +349,7 @@ def getBestEntId(ent_name, ent_ids):
         print("No entities found!")
 
 
-def findPropCombo(linked_props, properties):
+def findPropCombo(linked_props, properties, search_props=None):
     '''
         Checks what the best property for the linked properties is.
         Will return the final answer.
@@ -360,9 +361,22 @@ def findPropCombo(linked_props, properties):
         best_Linked_prop = linked_props[0][1]
         #print(best_Linked_prop)
         if best_Linked_prop in properties:
-            #print("Antwoord ", properties[best_Linked_prop])
-            if type(properties[best_Linked_prop]) == list:
-                pass
+            print("Antwoordx ", properties[best_Linked_prop])
+
+            #If it is a list then execute this.
+            
+            if type(properties[best_Linked_prop][0]) == dict:
+                #if search_props is not None:
+                #    return findBestPropVal(properties[best_Linked_prop], search_props)
+                return [dict['val'] for dict in properties[best_Linked_prop]]
+                for item in properties[best_Linked_prop]:
+                    val = item[0]
+                    prop = item[1]
+                    val_of_prop = item[2]
+
+                    getBestProp(search_props, linked_props)
+
+
             else:
                 return properties[best_Linked_prop]
         else:
@@ -390,6 +404,13 @@ def findPropCombo2(linked_props, entity2, properties):
             del linked_props[0]
             return findPropCombo2(linked_props, entity2, properties)
 
+
+def findBestPropVal(prop_val_list, search_props):
+    '''
+        Find the best property value.
+    '''
+    for prop_val_dict in prop_val_list:
+        prop_val_dict
 
 def execQuery(query, url):
     '''
@@ -501,6 +522,9 @@ def removeStopWords2(question, ent):
 
 
 def getBestProp(search_props, links, stop_word_weight=0.1):
+    '''
+        Returns the best linked properties based on the linked property list.
+    '''
     same_prop_counts = []
     for prop, related_props in links.items():
         #List with overlapping props
@@ -604,8 +628,6 @@ def getPropertiesExtended(ent_id):
     for row in answer['results']['bindings']:
         r_prop = row[prop]['value']
         r_val = row[value]['value']
-        r_prop_of_value = row[prop_of_value]['value']
-        r_val_value = row[value_of_prop_of_value]['value']
 
         if r_prop in output:
             output[r_prop].append(r_val)
@@ -614,10 +636,12 @@ def getPropertiesExtended(ent_id):
 
         #Inserting the properties of the values.
         if prop_of_value in row:
+            r_prop_of_value = row[prop_of_value]['value']
+            r_val_value = row[value_of_prop_of_value]['value']
             if r_prop_of_value in output:
-                output[r_prop_of_value].append((r_val, r_prop, r_val_value))
+                output[r_prop_of_value].append({r_prop : r_val, "val" : r_val_value})
             else:
-                output[r_prop_of_value] = [(r_val, r_prop, r_val_value)]
+                output[r_prop_of_value] = [{r_prop : r_val, "val" : r_val_value}]
 
     print(output)
 
