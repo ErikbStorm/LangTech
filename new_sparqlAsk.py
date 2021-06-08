@@ -9,7 +9,7 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = True
+DEBUG = False
 
 def main():
     questions = ['Who are the screenwriters for The Place Beyond The Pines?',
@@ -49,8 +49,8 @@ def main():
                 #'Which locations were used to film the movie "Black Panther"(2018)'
                 "Who is the main character in Fifty Shades of Grey?",
                 "What is the sequel to Fifty Shades of Grey?",
-                "How many Twitter followers does Tom Hanks have?",
-                "How many dollars did Frozen cost?"
+                "How many Twitter followers does Tom Hanks have?"
+                "How much did Frozen cost?"
                  ]
 
     links = readJson('property_links.json')
@@ -141,6 +141,7 @@ def ask(question, links):
         #If there are still no answers...
 
         if 'No' in answers or len(answers) == 0:
+            ent = getEntBackup(parse)
             answers = []
             for i in range(len(ent)):
                 if (DEBUG):
@@ -471,6 +472,16 @@ def getEnt(parse):
             entity.append(ent.text)
     return entity
 
+def getEntBackup(parse):
+    entity = list()
+    for word in parse[1:]:
+        if word.text.istitle() or word.text[0].isdigit():
+            entity.append(int(word.i))
+    if entity:
+        return [
+            ' '.join(word.text for word in parse[entity[0]:(entity[-1] + 1)])]
+    else:
+        return entity
 
 def removeStopWords(question, ent):
     '''

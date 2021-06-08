@@ -11,6 +11,7 @@ def ask(question):
 
 def evalQuestions(filename, write=True):
     output = []
+    output2 = []
     links = new_sparqlAsk.readJson('property_links.json')
     with open(filename, 'r', encoding='UTF-8') as f:
         file = csv.reader(f, delimiter='\t')
@@ -30,16 +31,22 @@ def evalQuestions(filename, write=True):
                 print(sys_answers, corr_answers)
                 score = evaluate(sys_answers, corr_answers)
                 print(score)
-                output.append([i, question, score, *sys_answers])
+                output.append([i, score, sys_answers])
+                output2.append([i, sys_answers])
             #if i > 20:
             #    break
     
     #Writing to a file.
     if write:
-        write_file = open('results.csv', 'w+', newline='')
-        writer = csv.writer(write_file, delimiter='\t')
-        writer.writerows(output)
-        write_file.close()
+        write_file1 = open('scores.csv', 'w+', newline='')
+        writer1 = csv.writer(write_file1, delimiter='\t')
+        writer1.writerows(output)
+        write_file1.close()
+
+        write_file2 = open('answers.csv', 'w+', newline='')
+        writer2 = csv.writer(write_file2, delimiter='\t')
+        writer2.writerows(output)
+        write_file1.close()
 
 
 def evaluate(sys_answers, all_corr_answers):
