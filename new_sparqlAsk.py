@@ -47,8 +47,10 @@ def main():
                 #"How long is Brad Pitt?",
                 #"Where was The Avengers filmed?"
                 #'Which locations were used to film the movie "Black Panther"(2018)'
-                "Who is the main character in Fifty Shades of Grey?"
-                #"How much did Frozen cost?"
+                "Who is the main character in Fifty Shades of Grey?",
+                "What is the sequel to Fifty Shades of Grey?",
+                "How many Twitter followers does Tom Hanks have?"
+                "How much did Frozen cost?"
                  ]
 
     links = readJson('property_links.json')
@@ -97,13 +99,15 @@ def ask(question, links):
         ent_ids.remove(best_ent_id[:2])
 
         if (DEBUG):
-            print("entity ids: ", ent_ids)
-        properties = getProperties(best_ent_id)
+            print("Entity ids: ", ent_ids)
+        properties = getPropertiesExtended(best_ent_id)
 
-
+        #First try to find answer with changing the properties
         answer = findPropCombo(linked_props.copy(), properties)
+
+        #If still no answer, try the same properties for a different entity.
         if answer == ['No']:
-            properties = getProperties(ent_ids[0])
+            properties = getPropertiesExtended(ent_ids[0])
             answer = findPropCombo(linked_props, properties)
         return answer
     
@@ -331,8 +335,7 @@ def getBestEntId(ent_name, ent_ids):
     output = []
     i = 0
     for ent_id, found_ent in ent_ids:
-        if (DEBUG):
-            print(found_ent, ent_name)
+        #print(found_ent, ent_name)
         distance = lev(found_ent, ent_name)
         output.append((ent_id, found_ent, distance+i))
         i+=1
@@ -361,8 +364,10 @@ def findPropCombo(linked_props, properties, search_props=None):
 
             #If it is a list then execute this.
             
-            if type(properties[best_Linked_prop][0]) == set:
-                return [z for _, _, z in properties[best_Linked_prop]]
+            if type(properties[best_Linked_prop][0]) == dict:
+                #if search_props is not None:
+                #    return findBestPropVal(properties[best_Linked_prop], search_props)
+                return [dict['val'] for dict in properties[best_Linked_prop]]
                 for item in properties[best_Linked_prop]:
                     val = item[0]
                     prop = item[1]
@@ -398,6 +403,13 @@ def findPropCombo2(linked_props, entity2, properties):
             del linked_props[0]
             return findPropCombo2(linked_props, entity2, properties)
 
+
+def findBestPropVal(prop_val_list, search_props):
+    '''
+        Find the best property value.
+    '''
+    for prop_val_dict in prop_val_list:
+        prop_val_dict
 
 def execQuery(query, url):
     '''
@@ -499,6 +511,9 @@ def removeStopWords2(question, ent):
 
 
 def getBestProp(search_props, links, stop_word_weight=0.1):
+    '''
+        Returns the best linked properties based on the linked property list.
+    '''
     same_prop_counts = []
     for prop, related_props in links.items():
         #List with overlapping props
