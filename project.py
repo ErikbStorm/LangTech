@@ -17,7 +17,6 @@ def evalQuestions(filename, write=True):
         for i, row in enumerate(file):
             if i > 0 and i < 100:
                 question = row[0]
-                wiki_id = row[1]
                 corr_answers = [answ.strip() for answ in row[2:]]
 
                 print(question)
@@ -51,15 +50,18 @@ def evaluate(sys_answers, all_corr_answers):
 
         @return A score indicating how good the answers are.
     '''
-    if sys_answers != None:
-        sys_answers = [str(answ).lower() for answ in sys_answers]
-        all_corr_answers = [str(answ).lower() for answ in all_corr_answers]
-        precision = getPrecision(sys_answers, all_corr_answers)
-        recall = getRecall(sys_answers, all_corr_answers)
-        if recall == 1 and precision == 1:
-            return 1
-        elif precision == 0.5:
-            return 0.5
+    try:
+        if sys_answers != None:
+            sys_answers = [answ.lower() for answ in sys_answers]
+            all_corr_answers = [answ.lower() for answ in all_corr_answers]
+            precision = getPrecision(sys_answers, all_corr_answers)
+            recall = getRecall(sys_answers, all_corr_answers)
+            if recall == 1 and precision == 1:
+                return 1
+            elif precision == 0.5:
+                return 0.5
+    except:
+        return 0
     return 0
 
 

@@ -46,6 +46,7 @@ def main():
                 #"How long is Frozen?",
                 #"How long is Brad Pitt?",
                 "Where was The Avengers filmed?"
+                'Which locations were used to film the movie "Black Panther"(2018)'
                  ]
 
     links = readJson('property_links.json')
@@ -53,6 +54,7 @@ def main():
         print(question)
         answer = ask(question, links)
         print(f"Answer: {answer}")
+
 
 def ask(question, links):
     parse = nlp(question)
@@ -67,7 +69,7 @@ def ask(question, links):
                             question=question,
                             links=links)
 
-        if "how many" in question.lower() or "count" in question.lower().split():
+        if "how many" in question.lower() or "count" in question.lower().split() or "number" in question.lower().split():
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
@@ -124,7 +126,8 @@ def ask(question, links):
             answer = findPropCombo2(linked_props, ent2, properties)
             if answer is not None:
                 answers += answer
-        print("Answers: ", answers)
+        if (DEBUG):
+            print("Answers: ", answers)
 
         #If there are still no answers...
 
@@ -209,6 +212,7 @@ def ask(question, links):
     else:
         return ['No']
 
+
 def askCount(parse, ent, question, links):
     ''''
     Processes a question and counts the amount of results
@@ -220,7 +224,7 @@ def askCount(parse, ent, question, links):
     ent_ids = getEntIds(ent)
     # Return 0 if no entities are found
     if len(ent_ids) == 0:
-        return [0]
+        return ["0"]
 
     linked_props = getBestProp(search_props, links)
     if (DEBUG):
@@ -229,12 +233,19 @@ def askCount(parse, ent, question, links):
     properties = getProperties(ent_ids[0])
 
     #check if results contains a number
-    results = findPropCombo(linked_props, properties)
-    if results[0].isdigit():
-        return results
-    else:
-        # Count results
-        return [len(results)]
+    search_list = [term.text for term in search_props]
+
+    if "number" in search_list:
+        for key, prop in linked_props:
+            for term in search_list:
+                if term in prop and term != "number":
+                    return [str(findPropCombo([(0,prop)], properties))]
+
+    #TODO Als result een nummer is het nummer returnen
+
+    # Count results
+    return [str(len(findPropCombo(linked_props, properties)))]
+
 
 def askYesNo(parse, ent, question, links):
     ''''
@@ -257,10 +268,8 @@ def askYesNo(parse, ent, question, links):
     if (DEBUG):
         print("Prop combo: " , prop_combo)
 
-
-
     if parse[0].text == 'Is':
-        for prop in linked_props.values():
+        for key, prop in linked_props:
             if prop in properties:
                 search_list = [term.lemma_ for term in search_props]
                 if any(term in search_list for term in properties[prop]):
@@ -269,7 +278,7 @@ def askYesNo(parse, ent, question, links):
         # for token in parse:
         #     if token.pos_ == "ADJ":
         #         return "Yes"
-    elif len(linked_props) > 1:
+    elif len(linked_props) > 0:
             return ["Yes"]
             
     return ["No"]
@@ -296,7 +305,7 @@ def askYesNo2(parse, ent, question, links):
         answers.append(findPropCombo2(linked_props, ent2, properties))
 
         if parse[0].text == 'Is':
-            for prop in linked_props.values():
+            for prop in linked_props:
                 if prop in properties:
                     search_list = [term.lemma_ for term in search_props]
                     if any(term in search_list for term in properties[prop]):
@@ -308,6 +317,7 @@ def askYesNo2(parse, ent, question, links):
         elif len(linked_props) > 1:
             return ["Yes"]
     return ["No"]
+
 
 def getBestEntId(ent_name, ent_ids):
     '''
@@ -330,6 +340,7 @@ def getBestEntId(ent_name, ent_ids):
     except:
         print("No entities found!")
 
+
 def findPropCombo(linked_props, properties):
     '''
         Checks what the best property for the linked properties is.
@@ -347,6 +358,7 @@ def findPropCombo(linked_props, properties):
         else:
             del linked_props[0]
             return findPropCombo(linked_props, properties)
+
 
 def findPropCombo2(linked_props, entity2, properties):
     '''
@@ -391,6 +403,7 @@ def execQuery(query, url):
 
     return results
 
+
 def getEntIds(entity):
     url = 'https://www.wikidata.org/w/api.php'
     params = {'action':'wbsearchentities',
@@ -403,6 +416,7 @@ def getEntIds(entity):
 
     p_ids = getIds(json)
     return p_ids[:5]
+
 
 def getIds(json):
     ids = []
@@ -452,6 +466,7 @@ def removeStopWords(question, ent):
 
     return no_stop_words
 
+
 def removeStopWords2(question, ent):
     for e in ent:
         question = question.replace(e, '')
@@ -492,6 +507,7 @@ def getAnswer(search_pred, properties):
     id_with_lowest_distance = min(distances.keys())
 
     return distances[id_with_lowest_distance]
+
 
 def getProperties(ent_id):
     if (DEBUG):
