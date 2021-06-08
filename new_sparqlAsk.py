@@ -34,12 +34,12 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                #"How many voice actors worked for Frozen?",
+                "How many voice actors worked on Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?",
-               # 'Which company distributed Avatar?',
+                # 'Which company distributed Avatar?',
                 # 'Who is Leonardo diCaprio?',
                 # "What is James Bond catchphrase?",
                 # "In what aspect ratio was Zack Snyder's Justice League shot?"
@@ -47,7 +47,8 @@ def main():
                 #"How long is Brad Pitt?",
                 #"Where was The Avengers filmed?"
                 #'Which locations were used to film the movie "Black Panther"(2018)'
-                "Who is the main character in Fifty Shades of Grey?"
+                "Who is the main character in Fifty Shades of Grey?",
+                "How many dollars did Frozen cost?"
                  ]
 
     links = readJson('property_links.json')
@@ -74,7 +75,7 @@ def ask(question, links):
                             links=links)
 
         splitted_question = question.lower().split()
-        if "how many" in question.lower() or "count" in splitted_question or "number" in splitted_question:
+        if "how many" in question.lower() or "how much" in question.lower() or "count" in splitted_question or "number" in splitted_question:
             return askCount(parse=parse,
                             ent=ent,
                             question=question,
@@ -242,16 +243,12 @@ def askCount(parse, ent, question, links):
     #check if results contains a number
     search_list = [term.text for term in search_props]
 
-    if "number" in search_list:
-        for key, prop in linked_props:
-            for term in search_list:
-                if term in prop and term != "number":
-                    return [str(findPropCombo([(0,prop)], properties))]
-
-    #TODO Als result een nummer is het nummer returnen
-
-    # Count results
-    return [str(len(findPropCombo(linked_props, properties)))]
+    result = findPropCombo(linked_props, properties)
+    if len(result) == 1 and result[0].isdigit():
+        return(str(result))
+    else:
+        # Count results
+        return [str(len(result))]
 
 
 def askYesNo(parse, ent, question, links):
