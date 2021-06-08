@@ -30,7 +30,7 @@ def evalQuestions(filename, write=True):
                 print(sys_answers, corr_answers)
                 score = evaluate(sys_answers, corr_answers)
                 print(score)
-                output.append([i, question, score, *sys_answers])
+                output.append([i, question, score, sys_answers])
             #if i > 20:
             #    break
     
