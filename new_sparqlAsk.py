@@ -521,7 +521,7 @@ def getBestProp(search_props, links, stop_word_weight=0.1):
 
     sorted_counts = sorted(same_prop_counts, key = lambda x: x[0], reverse=True)
 
-    return [(c,prop) for c, prop in sorted_counts if c is not 0][:4]
+    return [(c,prop) for c, prop in sorted_counts if c != 0][:4]
 
 
 def getAnswer(search_pred, properties):
