@@ -96,5 +96,6 @@
     "distributed by": ["distribute", "by", "company", "organisation", "which"],
     "notable work": ["notable", "work", "know", "for", "what"],
     "number of subscribers" : ["user", "subscriber", "number", "of", "follower", "how", "many"],
-    "social media followers" : ["social", "media", "follower", "Twitter", "Instagram", "how", "many", "amount", "number"]
+    "social media followers" : ["social", "media", "follower", "Twitter", "Instagram", "how", "many", "amount", "number"],
+    "population" : ["people", "how", "many", "population", "live"]
 }

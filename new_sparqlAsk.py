@@ -9,10 +9,10 @@ ruler = nlp.add_pipe("entity_ruler")
 ruler.from_disk("patterns.jsonl")
 
 # Global debug toggle
-DEBUG = False
+DEBUG = True
 
 def main():
-    questions = ['Who are the screenwriters for The Place Beyond The Pines?',
+    questions = [#'Who are the screenwriters for The Place Beyond The Pines?',
                 #'Who were the composers for Batman Begins?',
                 #'What awards did Frozen receive?',
                 #'How many awards did Frozen receive?',
@@ -34,7 +34,7 @@ def main():
                 #'Who is Leonardo di Caprio?',
                 #"What is James Bond catchphrase?",
                 # "Where did Brad Pitt go to school?"
-                "How many voice actors worked on Frozen?",
+                #"How many voice actors worked on Frozen?",
                 # 'Which company distributed Avatar?',
                 # 'Who is Leonardo di Caprio?',
                 # "What is James Bond catchphrase?",
@@ -47,10 +47,12 @@ def main():
                 #"How long is Brad Pitt?",
                 #"Where was The Avengers filmed?"
                 #'Which locations were used to film the movie "Black Panther"(2018)'
-                "Who is the main character in Fifty Shades of Grey?",
-                "What is the sequel to Fifty Shades of Grey?",
-                "How many Twitter followers does Tom Hanks have?"
-                "How much did Frozen cost?"
+                #"Who is the main character in Fifty Shades of Grey?",
+                #"What is the sequel to Fifty Shades of Grey?",
+                #"How many Twitter followers does Tom Hanks have?",
+                #"How much did Frozen cost?",
+                "What gender is Elliot Page?",
+                "How many episodes does The Queen's Gambit have?"
                  ]
 
     links = readJson('property_links.json')
@@ -88,7 +90,10 @@ def ask(question, links):
         if (DEBUG):
             print("Only one entity detected!")
             print("Search properties: " , search_props)
+        
         ent_ids = getEntIds(ent)
+        if (DEBUG):
+            print("Entity ids: ", ent_ids)
 
         #Link the propertires of the question to the linked properties.
         linked_props = getBestProp(search_props, links)
@@ -98,8 +103,6 @@ def ask(question, links):
         best_ent_id = getBestEntId(ent, ent_ids)
         ent_ids.remove(best_ent_id[:2])
 
-        if (DEBUG):
-            print("Entity ids: ", ent_ids)
         properties = getPropertiesExtended(best_ent_id)
 
         #First try to find answer with changing the properties
@@ -457,7 +460,7 @@ def readJson(filename):
 
 def getEnt(parse):
     entity = list()
-    if not parse.ents:
+    if len(parse.ents) == 0:
         for word in parse[1:]:
             if word.text.istitle() or word.text[0].isdigit():
                 entity.append(int(word.i))

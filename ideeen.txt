@@ -1,0 +1,11 @@
+Predict de verwachte richting van de prijs waarmee je een bot op kan laten trainen.
+
+Categorical: BUY: xx%, NOTHING: xx%, SELL xx%
+Bot kan bij een ingestelde confidence level een actie doen en daarop trainen.
+Data: Momenten om te kopen en verkopen
+
+Of
+
+Regression: Price in next X days will be xx% higher/lower
+Bot moet achteraf nog worden afgesteld op wanneer hij moet kopen/verkopen
+Data: Een getal van hoeveel de prijs verandert in procenten.

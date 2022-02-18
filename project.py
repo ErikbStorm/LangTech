@@ -4,7 +4,7 @@ import new_sparqlAsk
 def main():
     #for x, y in new_sparqlAsk.getPropertiesExtended(['Q127367']).items():
     #    print(x, " : ", y)
-    evalQuestions('all_questions_with_answers.tsv', write=True)
+    evalQuestions2('test_all1.csv', write=True)
 
 def ask(question):
     pass
@@ -38,14 +38,44 @@ def evalQuestions(filename, write=True):
     
     #Writing to a file.
     if write:
-        write_file1 = open('scores.csv', 'w+', newline='')
+        write_file1 = open('scores_test.csv', 'w+', newline='')
         writer1 = csv.writer(write_file1, delimiter='\t')
         writer1.writerows(output)
         write_file1.close()
 
-        write_file2 = open('answers.csv', 'w+', newline='')
+        write_file2 = open('answers_test.csv', 'w+', newline='')
         writer2 = csv.writer(write_file2, delimiter='\t')
         writer2.writerows(output)
+        write_file1.close()
+
+def evalQuestions2(filename, write=True):
+    output = []
+    output2 = []
+    links = new_sparqlAsk.readJson('property_links.json')
+    with open(filename, 'r', encoding='UTF-8') as f:
+        file = csv.reader(f, delimiter='\t')
+        for i, row in enumerate(file):
+            question = row[1]
+            corr_answers = [answ.strip() for answ in row[2:]]
+
+            print(question)
+            try:
+                sys_answers = new_sparqlAsk.ask(question, links)
+            except Exception as e:
+                #If program fails, then answer with No
+                print(e)
+                sys_answers = ['No']
+            print("Systeem antwoord: ", sys_answers)
+            #print(sys_answers, corr_answers)
+            #score = evaluate(sys_answers, corr_answers)
+            #print(score)
+            output.append([i, *sys_answers])
+    
+    #Writing to a file.
+    if write:
+        write_file1 = open('scores_test2.csv', 'w+', newline='')
+        writer1 = csv.writer(write_file1, delimiter='\t')
+        writer1.writerows(output)
         write_file1.close()
 
 

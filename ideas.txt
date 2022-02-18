@@ -1,0 +1,8 @@
+Predict: komende 1h candle verandering
+
+dependent variables:
+
+extension from average
+Rsi 1h
+Rsi daily
+resistance points

@@ -1,0 +1,29 @@
+#How to use
+new_sparqlAsk.py contains the program and project.py the evaluation part.
+
+To run the program:
+
+import new_sparqlAsk
+
+links = new_sparqlAsk.readJson('property_links.json')
+
+question = "When was Terence Hill born?"
+
+print(new_sparqlAsk.ask(question, links))
+
+#######
+
+project.py 
+Contains the evaluation of the program to finally test the program.
+
+new_sparqlAsk.py
+The program that contains the ask function that takes in a question and returns an answer.
+
+patterns.jsonl
+Contains a list of movies and actors.
+
+property_links.json
+A .json file that contains words and properties of Sparql used in new_sparlAsk.py. 
+
+create_entity_ruler.py
+A program that creates the patterns file: patterns.jsonl
